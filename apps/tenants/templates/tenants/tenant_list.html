@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Tenant Management{% endblock %}
+{% block header_subtitle %}View active tenants, profiles, and contact info{% endblock %}
+
+{% block content %}
+<!-- Filters & Add button -->
+<div class="saas-card mb-4">
+    <div class="p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <form method="get" class="d-flex align-items-center gap-2">
+            <select name="active" class="form-select w-auto">
+                <option value="">All Tenants</option>
+                <option value="yes" {% if active_filter == 'yes' %}selected{% endif %}>Active Only</option>
+                <option value="no" {% if active_filter == 'no' %}selected{% endif %}>Inactive / Past</option>
+            </select>
+            <button type="submit" class="btn btn-secondary btn-saas shadow-sm px-4">Filter</button>
+        </form>
+
+        <a href="{% url 'tenants:create' %}" class="btn btn-primary-saas btn-saas shadow-sm d-inline-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Add Tenant
+        </a>
+    </div>
+</div>
+
+<!-- Tenants Table -->
+<div class="saas-card overflow-hidden mb-4">
+    <div class="table-responsive">
+        <table class="table table-saas mb-0">
+            <thead>
+                <tr>
+                    <th>Tenant Details</th>
+                    <th>Contact Info</th>
+                    <th>Room Assigned</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tenant in page_obj %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary fw-bold rounded-circle border border-primary-subtle" style="width: 48px; height: 48px;">
+                                {{ tenant.first_name|make_list|first|upper }}
+                            </div>
+                            <div>
+                                <a href="{% url 'tenants:detail' tenant.pk %}" class="fw-bold text-dark text-decoration-none d-block">{{ tenant.full_name }}</a>
+                                {% if tenant.id_card %}
+                                <small class="text-muted"><i class="fa-regular fa-id-card me-1"></i>{{ tenant.id_card }}</small>
+                                {% else %}
+                                <small class="text-muted fst-italic">No ID added</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="text-dark small"><i class="fa-solid fa-phone text-muted me-2 w-15px"></i>{{ tenant.phone|default:'-' }}</div>
+                        <div class="text-dark small"><i class="fa-solid fa-envelope text-muted me-2 w-15px"></i>{{ tenant.email|default:'-' }}</div>
+                    </td>
+                    <td>
+                        {% if tenant.room %}
+                            <a href="{% url 'rooms:detail' tenant.room.pk %}" class="badge badge-soft-info text-decoration-none rounded-pill px-3 py-2 fw-semibold">
+                                Room {{ tenant.room.room_number }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted small fst-italic">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if tenant.is_active %}
+                            <span class="badge badge-soft-success rounded-pill px-3 py-2">Active</span>
+                        {% else %}
+                            <span class="badge badge-soft-secondary rounded-pill px-3 py-2">Past Tenant</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'tenants:edit' tenant.pk %}" class="btn btn-sm btn-light text-muted rounded-3 px-2 py-1 shadow-sm border ms-1">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <a href="{% url 'tenants:delete' tenant.pk %}" class="btn btn-sm btn-light text-danger rounded-3 px-2 py-1 shadow-sm border border-danger-subtle ms-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        No tenants found matching the criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="p-3 border-top d-flex justify-content-center">
+        <nav aria-label="Tenant Pagination">
+            <ul class="pagination pagination-sm mb-0">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if active_filter %}&active={{ active_filter }}{% endif %}"><i class="fa-solid fa-chevron-left"></i></a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link"><i class="fa-solid fa-chevron-left"></i></span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% if active_filter %}&active={{ active_filter }}{% endif %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if active_filter %}&active={{ active_filter }}{% endif %}"><i class="fa-solid fa-chevron-right"></i></a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link"><i class="fa-solid fa-chevron-right"></i></span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

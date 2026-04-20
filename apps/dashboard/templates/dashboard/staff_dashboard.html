@@ -1,0 +1,171 @@
+
+
+{% block title %}หน้าหลักเจ้าหน้าที่ | LuxeDorm{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="fw-bold text-dark mb-1">หน้าหลักเจ้าหน้าที่ (Operations)</h1>
+    <p class="text-muted">จัดการงานประจำวัน และตรวจสอบความเรียบร้อยของหอพัก</p>
+</div>
+
+<!-- Operational KPI Cards -->
+<div class="row g-4 mb-4">
+    <!-- ห้องพักที่ใช้งาน -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-admin card-admin-blue p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">ห้องพักที่ใช้งาน</div>
+                    <div class="text-xxl mb-1">{{ occupied_rooms|default:0 }}</div>
+                </div>
+                <div class="icon-box icon-box-blue rounded-circle">
+                    <i class="fa-solid fa-bed"></i>
+                </div>
+            </div>
+            <div class="mt-2 small text-muted">
+                จากทั้งหมด {{ total_rooms|default:0 }} ห้อง
+            </div>
+        </div>
+    </div>
+
+    <!-- รออนุมัติการจอง -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-admin card-admin-orange p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">รออนุมัติการจอง</div>
+                    <div class="text-xxl mb-1">{{ pending_bookings|default:0 }}</div>
+                </div>
+                <div class="icon-box icon-box-orange rounded-circle">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+            </div>
+            <div class="mt-2 small text-orange fw-bold">
+                รายการใหม่
+            </div>
+        </div>
+    </div>
+
+    <!-- งานซ่อมบำรุง -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-admin card-admin-red p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">งานซ่อมบำรุง</div>
+                    <div class="text-xxl mb-1">{{ maintenance_requests|default:0 }}</div>
+                </div>
+                <div class="icon-box icon-box-red rounded-circle">
+                    <i class="fa-solid fa-wrench"></i>
+                </div>
+            </div>
+            <div class="mt-2 small text-danger fw-bold">
+                รอดำเนินการ
+            </div>
+        </div>
+    </div>
+
+    <!-- พัสดุวันนี้ -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-admin p-4 h-100 border-start border-4 border-dark">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">พัสดุมาใหม่</div>
+                    <div class="text-xxl mb-1">{{ total_parcels|default:0 }}</div>
+                </div>
+                <div class="icon-box bg-light text-dark rounded-circle">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+            </div>
+            <div class="mt-2 small text-muted">
+                รายการพัสดุวันนี้
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Operational Actions -->
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="sys-card p-4">
+            <h5 class="fw-bold mb-4">เมนูจัดการงานทั่วไป</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="/rooms/" class="text-decoration-none">
+                        <div class="p-4 bg-light rounded-4 text-center border hover-shadow transition-all">
+                            <i class="fa-solid fa-door-open fs-2 text-primary mb-3"></i>
+                            <div class="fw-bold text-dark">จัดการห้องพัก</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/tenants/" class="text-decoration-none">
+                        <div class="p-4 bg-light rounded-4 text-center border hover-shadow transition-all">
+                            <i class="fa-solid fa-user-group fs-2 text-primary mb-3"></i>
+                            <div class="fw-bold text-dark">ข้อมูลผู้เช่า</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/parcels/" class="text-decoration-none">
+                        <div class="p-4 bg-light rounded-4 text-center border hover-shadow transition-all">
+                            <i class="fa-solid fa-box-archive fs-2 text-primary mb-3"></i>
+                            <div class="fw-bold text-dark">ระบบรับพัสดุ</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/maintenance/" class="text-decoration-none">
+                        <div class="p-4 bg-light rounded-4 text-center border hover-shadow transition-all">
+                            <i class="fa-solid fa-screwdriver-wrench fs-2 text-primary mb-3"></i>
+                            <div class="fw-bold text-dark">รายการแจ้งซ่อม</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/meters/" class="text-decoration-none">
+                        <div class="p-4 bg-light rounded-4 text-center border hover-shadow transition-all">
+                            <i class="fa-solid fa-gauge-high fs-2 text-primary mb-3"></i>
+                            <div class="fw-bold text-dark">จดมิเตอร์</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-4">
+        <div class="sys-card p-4 bg-dark text-white border-0">
+            <h6 class="fw-bold mb-4"><i class="fa-solid fa-bullhorn me-2 text-orange"></i>เตือนความจำเจ้าหน้าที่</h6>
+            <ul class="list-unstyled small">
+                <li class="mb-3 d-flex gap-2">
+                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                    <span>ตรวจสอบความเรียบร้อยของพื้นที่ส่วนกลางทุกเช้า</span>
+                </li>
+                <li class="mb-3 d-flex gap-2">
+                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                    <span>บันทึกเลขอ่านมิเตอร์ไฟฟ้าก่อนวันที่ 25 ของทุกเดือน</span>
+                </li>
+                <li class="d-flex gap-2">
+                    <i class="fa-solid fa-circle-check text-success mt-1"></i>
+                    <span>แจ้งเตือนผู้เช่าที่ลืมรับพัสดุเกิน 3 วัน</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="sys-card p-4 mt-4 text-center">
+            <div class="h5 fw-bold mb-3">ออกรายงานประจำวัน</div>
+            <p class="text-muted small">สรุปเหตุการณ์และจำนวนห้องว่างสำหรับส่งแอดมิน</p>
+            <button class="btn btn-primary rounded-pill w-100 py-2 fw-bold" onclick="alert('กำลังสร้างรายงาน...')">Download Report</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover { 
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #ea580c !important;
+    }
+    .transition-all { transition: all 0.2s ease; }
+</style>
+{% endblock %}

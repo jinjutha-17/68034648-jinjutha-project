@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}รายการชำระเงิน | LuxeDorm{% endblock %}
+
+{% block content %}
+<div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+        <h1 class="fw-bold text-dark mb-1">รายการชำระเงิน</h1>
+        <p class="text-muted">ตรวจสอบและยืนยันการชำระเงินจากผู้เช่า</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{% url 'payments:create' %}" class="btn btn-primary rounded-pill px-4">
+            <i class="fa-solid fa-plus me-2"></i> บันทึกการชำระเงินใหม่
+        </a>
+    </div>
+</div>
+
+<!-- Payment Stats -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6 col-xl-4">
+        <div class="sys-card card-admin card-admin-green p-4 h-100">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase mb-1">ชำระแล้วทั้งหมด</div>
+                    <div class="text-xxl">฿{{ paid_total|floatformat:2 }}</div>
+                </div>
+                <div class="icon-box icon-box-green rounded-circle"><i class="fa-solid fa-check-double"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+        <div class="sys-card card-admin card-admin-orange p-4 h-100">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase mb-1">รอการตรวจสอบ</div>
+                    <div class="text-xxl">฿{{ pending_total|floatformat:2 }}</div>
+                </div>
+                <div class="icon-box icon-box-orange rounded-circle"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Table -->
+<div class="sys-card">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">รายการล่าสุด</h5>
+        <div class="btn-group">
+            <a href="?status=" class="btn btn-sm btn-light border px-3 {% if not status_filter %}active{% endif %}">ทั้งหมด</a>
+            <a href="?status=pending" class="btn btn-sm btn-light border px-3 {% if status_filter == 'pending' %}active{% endif %}">รอตรวจสอบ</a>
+            <a href="?status=completed" class="btn btn-sm btn-light border px-3 {% if status_filter == 'completed' %}active{% endif %}">สำเร็จ</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">ห้อง</th>
+                    <th>ผู้เช่า</th>
+                    <th>วันที่ชำระ</th>
+                    <th>จำนวนเงิน</th>
+                    <th>สถานะ</th>
+                    <th class="pe-4 text-end">ดำเนินการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td class="ps-4">
+                        <span class="badge bg-white text-dark border px-3 py-2 rounded-4 fw-bold">
+                            {{ payment.room.room_number|default:payment.invoice.room.room_number }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fw-bold">{{ payment.tenant.full_name|default:payment.invoice.tenant.full_name }}</div>
+                        <div class="small text-muted">{{ payment.tenant.phone|default:"-" }}</div>
+                    </td>
+                    <td>{{ payment.payment_date|date:"j MY H:i" }}</td>
+                    <td class="fw-bold text-primary">฿{{ payment.amount|floatformat:2 }}</td>
+                    <td>
+                        {% if payment.status == 'completed' %}
+                            <span class="badge badge-soft-success rounded-pill px-3">สำเร็จ</span>
+                        {% elif payment.status == 'pending' %}
+                            <span class="badge badge-soft-warning rounded-pill px-3">รอตรวจสอบ</span>
+                        {% else %}
+                            <span class="badge badge-soft-danger rounded-pill px-3">ยกเลิก</span>
+                        {% endif %}
+                    </td>
+                    <td class="pe-4 text-end text-nowrap">
+                        {% if payment.status == 'pending' and request.user.is_staff %}
+                        <a href="{% url 'payments:approve' payment.pk %}" class="btn btn-sm btn-success rounded-pill px-3 me-2">
+                            <i class="fa-solid fa-check me-1"></i> อนุมัติทันที
+                        </a>
+                        {% endif %}
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'payments:detail' payment.pk %}" class="btn btn-outline-secondary border-0"><i class="fa-solid fa-eye"></i></a>
+                            <a href="{% url 'payments:edit' payment.pk %}" class="btn btn-outline-secondary border-0"><i class="fa-solid fa-pen-to-square"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">ไม่พบข้อมูลการชำระเงิน</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+                     </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-success { border-left: .25rem solid #198754!important; }
+    .border-left-warning { border-left: .25rem solid #ffc107!important; }
+    .card { border: none; border-radius: 10px; }
+    .table thead th { font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+    .badge { font-weight: 500; }
+</style>
+{% endblock %}

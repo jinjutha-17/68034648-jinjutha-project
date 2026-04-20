@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}ระบบจัดการพัสดุ | Parcel Management{% endblock %}
+
+{% block header_title %}Parcel Management{% endblock %}
+{% block header_subtitle %}ระบบจัดการพัสดุเข้า-ออก ของโครงการ{% endblock %}
+
+{% block content %}
+<div class="row mb-4 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <!-- Tabs for Filtering -->
+            <div class="nav nav-pills bg-white p-2 rounded-4 shadow-sm d-inline-flex border" id="pills-tab" role="tablist">
+                <a href="?status=pending&search={{ search_query }}" class="nav-link rounded-pill px-4 py-2 {% if status_filter == 'pending' %}active bg-primary-sys{% else %}text-muted{% endif %}">
+                    <i class="fa-solid fa-clock-rotate-left me-2"></i> พัสดุค้างรับ
+                </a>
+                <a href="?status=received&search={{ search_query }}" class="nav-link rounded-pill px-4 py-2 {% if status_filter == 'received' %}active bg-primary-sys{% else %}text-muted{% endif %}">
+                    <i class="fa-solid fa-check-double me-2"></i> พัสดุรับจ่ายแล้ว
+                </a>
+                <a href="?status=all&search={{ search_query }}" class="nav-link rounded-pill px-4 py-2 {% if status_filter == 'all' %}active bg-primary-sys{% else %}text-muted{% endif %}">
+                    <i class="fa-solid fa-layer-group me-2"></i> ทั้งหมด
+                </a>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-primary-sys rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addParcelModal">
+                    <i class="fa-solid fa-plus-circle fa-lg"></i>
+                    <span>เพิ่มพัสดุ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-4">
+        <form method="get" action="" class="position-relative shadow-sm rounded-pill overflow-hidden">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <input type="text" name="search" class="form-control border-0 ps-4 pe-5 py-3 rounded-pill" placeholder="ค้นหาเลขห้อง, ชื่อผู้เช่า หรือเลข Tracking..." value="{{ search_query }}">
+            <button type="submit" class="btn position-absolute top-50 end-0 translate-middle-y me-2 text-primary">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Parcel Cards Grid -->
+<div class="row g-4 animate__animated animate__fadeInUp">
+    {% if parcels %}
+        {% for parcel in parcels %}
+        <div class="col-md-6 col-lg-4 col-xl-3">
+            <div class="card sys-card h-100 border-0 shadow-sm overflow-hidden position-relative">
+                <!-- Status Badge Overlay -->
+                <div class="position-absolute top-0 end-0 m-3 z-1">
+                    {% if parcel.status == 'pending' %}
+                        <span class="badge badge-soft-danger rounded-pill px-3 py-2 border border-danger border-opacity-10 shadow-sm">
+                            <i class="fa-solid fa-circle-dot me-1 fa-beat-fade"></i> ค้างรับ
+                        </span>
+                    {% else %}
+                        <span class="badge badge-soft-success rounded-pill px-3 py-2 border border-success border-opacity-10 shadow-sm">
+                            <i class="fa-solid fa-circle-check me-1"></i> รับแล้ว
+                        </span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4 pt-5">
+                    <!-- Room & Tenant Header -->
+                    <div class="d-flex align-items-center gap-3 mb-4 mt-2">
+                        <div class="rounded-4 bg-light d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 56px; height: 56px; font-size: 1.25rem;">
+                            {{ parcel.room.room_number }}
+                        </div>
+                        <div class="overflow-hidden">
+                            <h5 class="card-title mb-0 text-dark text-truncate">{{ parcel.tenant.full_name|default:"ไม่ระบุชื่อ" }}</h5>
+                            <small class="text-muted"><i class="fa-solid fa-user-circle me-1"></i> ผู้เช่าห้อง {{ parcel.room.room_number }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Parcel Info -->
+                    <div class="space-y-3 mb-4">
+                        <div class="d-flex align-items-center gap-2 text-muted mb-2">
+                            <i class="fa-solid fa-truck-fast text-primary w-20px"></i>
+                            <span class="small fw-medium">{{ parcel.get_courier_display }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 text-muted mb-2">
+                            <i class="fa-solid fa-barcode text-primary w-20px"></i>
+                            <span class="small font-monospace">{{ parcel.tracking_number }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 text-muted mb-2">
+                            <i class="fa-solid fa-box text-primary w-20px"></i>
+                            <span class="small">{{ parcel.parcel_type }}</span>
+                        </div>
+                    </div>
+
+                    <hr class="border-light opacity-50 mb-4">
+
+                    <!-- Date & Actions -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted" style="font-size: 0.75rem;">
+                            <div class="mb-1"><i class="fa-regular fa-calendar-plus me-1"></i> {{ parcel.received_at|date:"d M Y" }}</div>
+                            <div><i class="fa-regular fa-clock me-1"></i> {{ parcel.received_at|date:"H:i" }} น.</div>
+                        </div>
+                        
+                        {% if parcel.status == 'pending' %}
+                        <a href="{% url 'confirm_receipt' parcel.id %}" class="btn btn-outline-success btn-sm rounded-pill px-3 shadow-sm onclick-confirm">
+                            <i class="fa-solid fa-check me-1"></i> จ่ายพัสดุ
+                        </a>
+                        {% else %}
+                        <div class="text-success small fw-medium">
+                            <i class="fa-solid fa-circle-check me-1"></i> จ่ายแล้ว
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if parcel.parcel_image %}
+                <!-- Thumbnail if image exists -->
+                <div class="card-footer bg-white border-0 p-0 text-center">
+                     <a href="{{ parcel.parcel_image.url }}" target="_blank" class="d-block py-2 bg-light text-muted small hover-overlay">
+                         <i class="fa-solid fa-image me-1"></i> ดูรูปถ่ายพัสดุ
+                     </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12 py-5 text-center">
+        <div class="mb-4 text-muted">
+            <i class="fa-solid fa-box-open fa-5x opacity-25"></i>
+        </div>
+        <h4 class="text-muted fw-bold">ไม่พบข้อมูลพัสดุ</h4>
+        <p class="text-muted">ลองเปลี่ยนตัวกรอง หรือค้นหาใหม่อีกครั้ง</p>
+        <button class="btn btn-primary-sys rounded-pill mt-3" data-bs-toggle="modal" data-bs-target="#addParcelModal">
+            <i class="fa-solid fa-plus me-1"></i> เพิ่มพัสดุรายการแรก
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Parcel Modal (Modern Popup) -->
+<div class="modal fade" id="addParcelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-primary">
+                    <i class="fa-solid fa-plus-circle me-2"></i>เพิ่มพัสดุรายการใหม่
+                </h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-4">ระบุข้อมูลพัสดุที่ได้รับให้ครบถ้วนเพื่อแจ้งเตือนผู้เช่าโดยอัตโนมัติ</p>
+                
+                <form id="parcelForm" method="post" action="{% url 'add_parcel' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-dark small mb-2"><i class="fa-solid fa-door-open me-1"></i> ห้องของผู้รับ / ผู้เช่า</label>
+                        {{ form.room }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-dark small mb-2"><i class="fa-solid fa-barcode me-1"></i> หมายเลขพัสดุ (Tracking Number)</label>
+                        {{ form.tracking_number }}
+                    </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-medium text-dark small mb-2"><i class="fa-solid fa-truck-fast me-1"></i> บริษัทขนส่ง</label>
+                            {{ form.courier }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-medium text-dark small mb-2"><i class="fa-solid fa-box me-1"></i> ประเภทพัสดุ</label>
+                            {{ form.parcel_type }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-medium text-dark small mb-2"><i class="fa-solid fa-image me-1"></i> รูปถ่ายพัสดุ (ถ้ามี)</label>
+                        {{ form.parcel_image }}
+                        <div class="form-text mt-2 small text-muted">
+                            <i class="fa-solid fa-info-circle me-1"></i> การแนบรูปถ่ายจะช่วยให้ผู้เช่าสังเกตพัสดุได้ง่ายขึ้น
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 pt-2">
+                        <button type="submit" class="btn btn-primary-sys py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="fa-solid fa-save me-2"></i>บันทึกและส่งแจ้งเตือน
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+    }
+    
+    .nav-pills .nav-link:not(.active):hover {
+        background-color: #f8f9fa;
+        color: var(--brand-primary) !important;
+    }
+    
+    .sys-card {
+        transition: all 0.3s ease;
+    }
+    
+    .sys-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    }
+    
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    
+    .w-20px { width: 24px; text-align: center; }
+    
+    .btn-outline-success:hover {
+        background-color: #16a34a;
+        color: white;
+    }
+    
+    .hover-overlay:hover {
+        background-color: #f1f5f9 !important;
+        color: var(--brand-primary) !important;
+    }
+
+    /* Override standard Select2 if available or use regular styling */
+    .form-select, .form-control {
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        background-color: #f8fafc;
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1);
+        background-color: white;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Confirm before confirming receipt
+        const confirmBtns = document.querySelectorAll('.onclick-confirm');
+        confirmBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('ยืนยันว่าพัสดุรายการนี้ได้ถูกรับจ่ายให้กับผู้เช่าแล้ว?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

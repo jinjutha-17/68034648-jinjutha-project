@@ -1,0 +1,663 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tenant Home - LuxeDorm</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/tenant_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .btn-pay {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            border-radius: 999px;
+            padding: 12px 22px;
+            background: #ffffff;
+            color: #ea580c;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .btn-pay:hover {
+            background: #fff7ed;
+            color: #c2410c;
+            transform: translateY(-1px);
+        }
+
+        .btn-pay.disabled,
+        .btn-pay[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        #repairOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1050;
+            align-items: flex-end;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        #repairOverlay.active {
+            display: flex;
+        }
+
+        #repairSheet {
+            background: #fff;
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 520px;
+            padding: 28px 24px 40px;
+            animation: slideUpSheet 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 85vh;
+            overflow-y: auto;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .drag-handle {
+            width: 40px;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 99px;
+            margin: 0 auto 20px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .cat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .cat-btn {
+            background: #fafafa;
+            border: 1.5px solid #eee;
+            border-radius: 14px;
+            padding: 16px 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .cat-btn:hover {
+            background: #fff8ee;
+            border-color: #F5A623;
+            transform: translateY(-2px);
+        }
+
+        .cat-btn .cat-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .cat-btn .cat-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .item-btn {
+            background: #fafafa;
+            border: 1.5px solid #eee;
+            border-radius: 12px;
+            padding: 13px 16px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            transition: all 0.15s;
+        }
+
+        .item-btn:hover {
+            background: #fff8ee;
+            border-color: #F5A623;
+        }
+
+        .item-btn.dashed {
+            border-style: dashed;
+            border-color: #ccc;
+            color: #aaa;
+        }
+
+        .summary-box {
+            background: #fff8ee;
+            border: 1.5px solid #ffe0a0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-box .sum-icon {
+            font-size: 22px;
+        }
+
+        .summary-box .sum-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .summary-box .sum-cat {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #F5A623;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .note-textarea {
+            width: 100%;
+            border-radius: 12px;
+            border: 1.5px solid #e0e0e0;
+            padding: 12px 14px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            box-sizing: border-box;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .submit-btn {
+            margin-top: 16px;
+            width: 100%;
+            background: #F5A623;
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 14px;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(245,166,35,0.4);
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .cancel-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: #aaa;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+        }
+
+        #successToast {
+            display: none;
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 16px;
+            padding: 16px 28px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 1100;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        #successToast.toast-success {
+            background: #1a1a1a;
+            color: #fff;
+            animation: slideUpToast 0.3s ease;
+        }
+
+        #successToast.toast-error {
+            background: #dc2626;
+            color: #fff;
+            animation: slideUpToast 0.3s ease;
+        }
+
+        #paymentOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1060;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        #paymentModal {
+            background: #fff;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px;
+            padding: 28px 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUpSheet {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideUpToast {
+            from { transform: translateX(-50%) translateY(30px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tenant-container">
+        <div class="welcome-header d-flex justify-content-between align-items-center">
+            <div>
+                <h1>ยินดีต้อนรับคุณ {{ full_name }}</h1>
+                <p class="text-muted">
+                    <i class="fas fa-door-open me-2"></i>เลขที่ห้อง: {{ room_number }}
+                    <a href="{% url 'tenants:choose_room' %}" class="btn btn-sm btn-outline-primary ms-2 rounded-pill">
+                        <i class="fas fa-exchange-alt me-1"></i>เลือกห้อง
+                    </a>
+                </p>
+            </div>
+            <div class="text-end">
+                <a href="{% url 'accounts:logout' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                    ออกจากระบบ
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info rounded-4">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if error %}
+            <div class="alert alert-warning rounded-4">{{ error }}</div>
+        {% endif %}
+
+        <div class="orange-card">
+            <div class="label">ยอดที่ต้องชำระปัจจุบัน</div>
+            <div class="amount">฿ {{ latest_invoice|default:"0.00" }}</div>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                {% if latest_invoice and latest_invoice > 0 %}
+                <button type="button" class="btn-pay" onclick="openPaymentPopup()">
+                    <i class="fas fa-credit-card me-2"></i>แจ้งชำระเงิน
+                </button>
+                {% else %}
+                <button class="btn-pay disabled" disabled>
+                    <i class="fas fa-check-circle me-2"></i>ไม่มียอดค้างชำระ
+                </button>
+                {% endif %}
+
+                <span class="opacity-75 small">
+                    <i class="fas fa-calendar-alt me-1"></i>ครบกำหนดชำระตามบิลล่าสุด
+                </span>
+            </div>
+        </div>
+
+        <div class="status-grid">
+            <div class="d-flex flex-column gap-3">
+                <div class="luxe-card">
+                    <h3><i class="fas fa-bolt text-warning"></i> มิเตอร์ไฟฟ้า</h3>
+                    <div class="meter-value">
+                        {{ curr_elec|default:"0" }} <small class="text-muted" style="font-size: 1rem;">หน่วย</small>
+                    </div>
+                    <div class="small text-muted mt-2">
+                        ใช้ไป {{ electric_units|default:"0" }} หน่วย
+                    </div>
+                </div>
+
+                <div class="luxe-card">
+                    <h3><i class="fas fa-tint text-primary"></i> มิเตอร์น้ำ</h3>
+                    <div class="meter-value">
+                        {{ curr_water|default:"0" }} <small class="text-muted" style="font-size: 1rem;">หน่วย</small>
+                    </div>
+                    <div class="small text-muted mt-2">
+                        ใช้ไป {{ water_units|default:"0" }} หน่วย
+                    </div>
+                </div>
+
+                <div class="luxe-card">
+                    <h3><i class="fas fa-tools text-danger"></i> แจ้งซ่อม</h3>
+                    <p class="text-muted mb-3">หากมีปัญหาในห้องพัก สามารถแจ้งซ่อมได้ที่นี่</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button onclick="openRepair()" class="btn btn-warning rounded-pill">
+                            <i class="fas fa-wrench me-1"></i>แจ้งซ่อม
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                <div class="luxe-card flex-grow-1">
+                    <h3><i class="fas fa-box text-orange" style="color: #FF8C00;"></i> พัสดุของคุณ</h3>
+                    <table class="table-luxe">
+                        <thead>
+                            <tr>
+                                <th>ขนส่ง</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for parcel in recent_parcels %}
+                            <tr>
+                                <td>{{ parcel.get_courier_display|default:parcel.courier }}</td>
+                                <td>
+                                    {% if parcel.status == 'pending' %}
+                                        <span class="badge-pending">รอรับ</span>
+                                    {% else %}
+                                        <span class="badge bg-success">รับแล้ว</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-muted">ไม่มีพัสดุล่าสุด</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="small text-muted mt-3">
+                        พัสดุค้างรับ {{ pending_parcels|default:"0" }} รายการ
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="repairOverlay" onclick="handleOverlayClick(event)">
+        <div id="repairSheet">
+            <div class="drag-handle"></div>
+
+            <div id="stepCategory" class="step active">
+                <h2 style="font-size:18px;font-weight:700;margin-bottom:6px;color:#1a1a1a;">แจ้งซ่อมอะไร?</h2>
+                <p style="color:#888;font-size:14px;margin-bottom:20px;">เลือกหมวดหมู่ที่มีปัญหา</p>
+                <div class="cat-grid" id="catGrid"></div>
+                <button class="cancel-link" onclick="closeRepair()">ยกเลิก</button>
+            </div>
+
+            <div id="stepItem" class="step">
+                <button class="back-btn" onclick="goStep('stepCategory')">← กลับ</button>
+                <h2 id="itemTitle" style="font-size:18px;font-weight:700;margin-bottom:6px;color:#1a1a1a;"></h2>
+                <p style="color:#888;font-size:14px;margin-bottom:18px;">อะไรมีปัญหา?</p>
+                <div class="item-list" id="itemList"></div>
+            </div>
+
+            <div id="stepNote" class="step">
+                <button class="back-btn" onclick="goStep('stepItem')">← กลับ</button>
+                <h2 style="font-size:18px;font-weight:700;margin-bottom:16px;color:#1a1a1a;">รายละเอียดเพิ่มเติม</h2>
+                <div class="summary-box">
+                    <span class="sum-icon" id="sumIcon"></span>
+                    <div>
+                        <div class="sum-name" id="sumName"></div>
+                        <div class="sum-cat" id="sumCat"></div>
+                    </div>
+                </div>
+                <textarea
+                    class="note-textarea"
+                    id="repairNote"
+                    rows="4"
+                    placeholder="อธิบายปัญหาเพิ่มเติม เช่น ตำแหน่งที่เสีย ความรุนแรง... (ไม่บังคับ)"
+                ></textarea>
+                <button class="submit-btn" id="submitBtn" onclick="submitRepair()">✅ ส่งคำขอแจ้งซ่อม</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT POPUP -->
+    <div id="paymentOverlay" onclick="handlePaymentOverlayClick(event)">
+        <div id="paymentModal">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0">แจ้งชำระเงิน</h4>
+                <button type="button" onclick="closePaymentPopup()" style="border:none; background:none; font-size:22px; cursor:pointer;">×</button>
+            </div>
+
+            <div class="bg-light rounded-4 p-3 mb-4">
+                <div><strong>ห้อง:</strong> {{ room_number }}</div>
+                <div><strong>ยอดชำระ:</strong> ฿{{ latest_invoice }}</div>
+                <div><strong>สถานะ:</strong> รอชำระ</div>
+            </div>
+
+            {% if latest_payment_id %}
+            <form method="post" action="{% url 'payments:tenant_payment_submit' latest_payment_id %}">
+                {% csrf_token %}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success w-100 rounded-pill">
+                        ยืนยันแจ้งชำระเงิน
+                    </button>
+                    <button type="button" onclick="closePaymentPopup()" class="btn btn-outline-secondary w-100 rounded-pill">
+                        ยกเลิก
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert alert-warning text-center mb-0">
+                ไม่พบบิลค้างชำระ
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="successToast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const CSRF_TOKEN = "{{ csrf_token }}";
+        const AJAX_URL = "{% url 'repairs:ajax_create' %}";
+
+        const categories = [
+            { id: "electric", icon: "⚡", label: "ไฟฟ้า", items: ["ไฟดับ / หลอดไฟเสีย", "เต้าเสียบไฟไม่มีไฟ", "แอร์เสีย", "พัดลมเสีย", "TV ไม่ติด"] },
+            { id: "plumbing", icon: "🚿", label: "ประปา", items: ["น้ำไม่ไหล", "ท่อน้ำรั่ว", "ฝักบัวเสีย", "โถส้วมอุดตัน", "อ่างล้างมือรั่ว"] },
+            { id: "furniture", icon: "🛏️", label: "เฟอร์นิเจอร์", items: ["เตียงชำรุด", "ตู้เสื้อผ้าพัง", "โต๊ะ / เก้าอี้เสีย", "ประตู / หน้าต่างเสีย", "กุญแจห้องมีปัญหา"] },
+            { id: "internet", icon: "📶", label: "อินเทอร์เน็ต", items: ["WiFi ไม่ได้", "สัญญาณอ่อน", "เน็ตช้ามาก", "เราเตอร์เสีย"] },
+            { id: "cleaning", icon: "🧹", label: "ความสะอาด", items: ["ห้องน้ำสกปรก", "แมลง / สัตว์รบกวน", "กลิ่นไม่พึงประสงค์", "ขยะไม่ได้เก็บ"] },
+            { id: "other", icon: "🔧", label: "อื่นๆ", items: ["ผนัง / เพดานชำรุด", "พื้นเสียหาย", "ราวระเบียงพัง", "ลิฟต์มีปัญหา"] },
+        ];
+
+        let selectedCat = null;
+        let selectedItem = null;
+
+        const catGrid = document.getElementById('catGrid');
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = 'cat-btn';
+            btn.innerHTML = `<div class="cat-icon">${cat.icon}</div><div class="cat-label">${cat.label}</div>`;
+            btn.onclick = () => selectCategory(cat.id);
+            catGrid.appendChild(btn);
+        });
+
+        function openRepair() {
+            selectedCat = null;
+            selectedItem = null;
+            document.getElementById('repairNote').value = '';
+            goStep('stepCategory');
+            document.getElementById('repairOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRepair() {
+            document.getElementById('repairOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('repairOverlay')) {
+                closeRepair();
+            }
+        }
+
+        function goStep(stepId) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function selectCategory(catId) {
+            selectedCat = categories.find(c => c.id === catId);
+            document.getElementById('itemTitle').textContent = `${selectedCat.icon} ${selectedCat.label}`;
+
+            const list = document.getElementById('itemList');
+            list.innerHTML = '';
+
+            selectedCat.items.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'item-btn';
+                btn.textContent = item;
+                btn.onclick = () => selectItem(item);
+                list.appendChild(btn);
+            });
+
+            const other = document.createElement('button');
+            other.className = 'item-btn dashed';
+            other.textContent = '+ อื่นๆ (ระบุเอง)';
+            other.onclick = () => selectItem('อื่นๆ');
+            list.appendChild(other);
+
+            goStep('stepItem');
+        }
+
+        function selectItem(item) {
+            selectedItem = item;
+            document.getElementById('sumIcon').textContent = selectedCat.icon;
+            document.getElementById('sumName').textContent = item;
+            document.getElementById('sumCat').textContent = selectedCat.label;
+            goStep('stepNote');
+        }
+
+        function submitRepair() {
+            if (!selectedCat || !selectedItem) return;
+
+            const note = document.getElementById('repairNote').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ กำลังส่ง...';
+
+            fetch(AJAX_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": CSRF_TOKEN,
+                },
+                body: JSON.stringify({
+                    category: selectedCat.id,
+                    category_label: selectedCat.label,
+                    issue: selectedItem,
+                    description: note || `แจ้งซ่อม: ${selectedCat.label} - ${selectedItem}`,
+                    priority: "medium",
+                }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                closeRepair();
+
+                if (data.success) {
+                    showToast('✅ ' + (data.message || 'แจ้งซ่อมสำเร็จ'), 'success');
+                } else {
+                    showToast('❌ ' + (data.message || 'เกิดข้อผิดพลาด'), 'error');
+                }
+            })
+            .catch(() => {
+                closeRepair();
+                showToast('❌ ไม่สามารถส่งคำขอได้ กรุณาลองใหม่', 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✅ ส่งคำขอแจ้งซ่อม';
+            });
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('successToast');
+            toast.textContent = msg;
+            toast.className = type === 'success' ? 'toast-success' : 'toast-error';
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
+
+        function openPaymentPopup() {
+            const el = document.getElementById('paymentOverlay');
+            el.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePaymentPopup() {
+            const el = document.getElementById('paymentOverlay');
+            el.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function handlePaymentOverlayClick(e) {
+            if (e.target.id === 'paymentOverlay') {
+                closePaymentPopup();
+            }
+        }
+    </script>
+</body>
+</html> 

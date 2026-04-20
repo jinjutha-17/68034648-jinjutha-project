@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}{{ title }} | Apartment Manager{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="fw-bold mb-0">{{ title }}</h4>
+  <a href="{% url 'bookings:list' %}" class="btn btn-outline-dark">Cancel</a>
+</div>
+<div class="card border-0 shadow-sm" style="max-width:600px">
+  <div class="card-body p-4">
+    <form method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'bookings:list' %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

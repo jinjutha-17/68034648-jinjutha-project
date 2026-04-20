@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}หน้าหลัก (Admin Dashboard) | LuxeDorm{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="fw-bold text-dark mb-1">หน้าหลักผู้ดูแลระบบ</h1>
+    <p class="text-muted">สรุปข้อมูลภาพรวมของหอพักแบบเรียลไทม์</p>
+</div>
+
+<!-- KPI Cards - LuxeDorm Premium Upgrade -->
+<div class="row g-4 mb-4">
+    <!-- รายรับทั้งหมด -->
+    {% if request.user.is_superuser or request.user.profile.role == 'Admin' %}
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-premium card-admin-green p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">รายรับทั้งหมด</div>
+                    <div class="text-xxl mb-0">฿{{ total_income|default:"0.00" }}</div>
+                </div>
+                <div class="icon-box icon-box-green shadow-sm">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+            </div>
+            <div class="mt-3 small text-success fw-bold d-flex align-items-center">
+                <i class="fa-solid fa-circle-check me-2"></i> มีการชำระเงินเข้ามา
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ห้องที่มีผู้เช่า -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-premium card-admin-blue p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">ห้องพักที่มีผู้เช่า</div>
+                    <div class="text-xxl mb-0">{{ occupied_rooms|default:0 }}</div>
+                </div>
+                <div class="icon-box icon-box-blue shadow-sm">
+                    <i class="fa-solid fa-house-user"></i>
+                </div>
+            </div>
+            <div class="mt-3 small text-muted">
+                จากทั้งหมด {{ total_rooms|default:0 }} ห้องพัก
+            </div>
+        </div>
+    </div>
+
+    <!-- ยอดค้างชำระ -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-premium card-admin-red p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">ยอดค้างชำระ</div>
+                    <div class="text-xxl mb-0">{{ overdue_payments|default:0 }}</div>
+                </div>
+                <div class="icon-box icon-box-red shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+            </div>
+            <div class="mt-3 small text-danger fw-bold d-flex align-items-center">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i> เกินกำหนดชำระ
+            </div>
+        </div>
+    </div>
+
+    <!-- รายการแจ้งซ่อม -->
+    <div class="col-md-6 col-xl-3">
+        <div class="sys-card card-premium card-admin-orange p-4 h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-muted small fw-bold mb-1 text-uppercase">รายการแจ้งซ่อม</div>
+                    <div class="text-xxl mb-0">{{ maintenance_requests|default:0 }}</div>
+                </div>
+                <div class="icon-box icon-box-orange shadow-sm">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+            </div>
+            <div class="mt-3 small text-orange fw-bold d-flex align-items-center">
+                รอเจ้าหน้าที่ตรวจสอบ
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts & Stats Section -->
+<div class="row g-4 mb-4">
+    {% if request.user.is_superuser or request.user.profile.role == 'Admin' %}
+    <div class="col-xl-8">
+        <div class="sys-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">แนวโน้มรายได้</h5>
+                    <span class="text-muted small">สถิติรายรับย้อนหลัง 6 เดือน</span>
+                </div>
+                <span class="badge bg-soft-info text-primary rounded-pill px-3 py-2 border"><i class="fa-solid fa-circle-nodes me-2"></i>วิเคราะห์ข้อมูล</span>
+            </div>
+            <div style="height: 320px;">
+                <canvas id="incomeChart"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="col-xl-4 d-flex flex-column gap-3">
+        <div class="sys-card p-4 flex-grow-1">
+            <h6 class="text-muted small fw-bold text-uppercase mb-3">สัดส่วนการเข้าพัก</h6>
+            <div style="height: 180px;">
+                <canvas id="occupancyChart"></canvas>
+            </div>
+        </div>
+        
+        {% if request.user.is_superuser or request.user.profile.role == 'Admin' %}
+        <div class="sys-card p-4 flex-grow-1 border-start border-primary border-4">
+            <h6 class="text-muted small fw-bold text-uppercase mb-2">สรุปค่าเช่าเดือนนี้</h6>
+            <div class="h3 fw-bold mb-0">฿{{ rent_total|floatformat:2 }}</div>
+            <div class="small text-success mt-1"><i class="fa-solid fa-arrow-up-right-dots me-1"></i> เป็นไปตามเป้าหมาย</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Activity & Tables -->
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="sys-card h-100">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">ผู้เช่าใหม่ล่าสุด</h5>
+                <a href="/tenants/" class="btn btn-light btn-sm rounded-pill px-3">ดูทั้งหมด</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">ชื่อ-นามสกุล</th>
+                            <th>ห้องพัก</th>
+                            <th>เบอร์โทรศัพท์</th>
+                            <th class="pe-4 text-end">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tenant in recent_tenants %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold">{{ tenant.full_name }}</span>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ tenant.room.room_number|default:'-' }}</span></td>
+                            <td>{{ tenant.phone|default:'-' }}</td>
+                            <td class="pe-4 text-end">
+                                <span class="badge badge-soft-success rounded-pill px-3">Active</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">ไม่พบข้อมูลผู้เช่า</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="sys-card h-100">
+            <div class="p-4 border-bottom">
+                <h5 class="fw-bold mb-0">สรุปห้องว่างรายชั้น</h5>
+            </div>
+            <div class="p-4">
+                {% for floor_stat in rooms_by_floor %}
+                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded-4 border">
+                    <span class="fw-bold">ชั้น {{ floor_stat.floor }}</span>
+                    <span class="badge bg-white text-dark shadow-sm rounded-pill px-3 py-2 border">ว่าง {{ floor_stat.available }} ห้อง</span>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-5">ไม่มีข้อมูลห้องพัก</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Line Chart
+        const ctxIncome = document.getElementById('incomeChart');
+        if (ctxIncome) {
+            new Chart(ctxIncome, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_labels|safe|default:"['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']" }},
+                    datasets: [{
+                        label: 'รายรับ (฿)',
+                        data: {{ chart_data|safe|default:"[0, 0, 0, 0, 0, 0]" }},
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234, 88, 12, 0.05)',
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#ea580c',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'Kanit' } }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { font: { family: 'Kanit' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Doughnut Chart
+        const ctxOccupancy = document.getElementById('occupancyChart');
+        if (ctxOccupancy) {
+            new Chart(ctxOccupancy, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ห้องว่าง', 'มีผู้เช่า'],
+                    datasets: [{
+                        data: [{{ available_rooms|default:0 }}, {{ occupied_rooms|default:0 }}],
+                        backgroundColor: ['#f8fafc', '#1e293b'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: { 
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

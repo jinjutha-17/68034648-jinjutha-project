@@ -1,0 +1,163 @@
+:root {
+    /* Color Palette - LuxeDorm Premium Theme */
+    --brand-primary: #ea580c; /* Orange-600 */
+    --brand-primary-hover: #c2410c; /* Orange-700 */
+    --brand-navy: #1e293b;
+    --brand-blue: #3b82f6;
+    --brand-green: #10b981;
+    --brand-red: #ef4444;
+    --brand-orange: #f97316;
+    
+    --sidebar-bg: #FFFFFF;
+    --sidebar-hover: #f8fafc;
+    --bg-body: #f1f5f9;
+    --card-bg: #FFFFFF;
+    --white: #ffffff;
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    
+    /* Shadows & Rounding */
+    --rounded-lg: 20px;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background-color: var(--bg-body);
+    font-family: 'Kanit', sans-serif !important;
+    color: var(--text-dark);
+    overflow-x: hidden;
+}
+
+/* Global Rounding */
+.sys-card, .card, .btn, .list-group-item, .form-control, .badge {
+    border-radius: var(--rounded-lg) !important;
+}
+
+/* Layout Definitions */
+#wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+}
+
+#sidebar-wrapper {
+    min-width: 280px;
+    max-width: 280px;
+    min-height: 100vh;
+    background-color: var(--sidebar-bg);
+    transition: all 0.3s ease;
+    z-index: 1040;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 1px 0 0 var(--border-color);
+}
+
+#page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar Styling */
+.sidebar-logo {
+    padding: 2rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--brand-primary);
+    text-decoration: none;
+}
+
+.list-group-item {
+    padding: 0.8rem 1.5rem;
+    margin: 0.2rem 1rem;
+    border: none !important;
+    color: var(--text-muted) !important;
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: var(--sidebar-hover) !important;
+    color: var(--brand-primary) !important;
+    transform: translateX(5px);
+}
+
+.list-group-item.active {
+    background-color: rgba(234, 88, 12, 0.1) !important;
+    color: var(--brand-primary) !important;
+    font-weight: 600;
+}
+
+/* Cards Design */
+.sys-card {
+    background: var(--card-bg);
+    border: none;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sys-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+}
+
+/* Admin KPI Cards */
+.card-admin {
+    border-left: 6px solid var(--border-color);
+}
+.card-admin-green { border-left-color: var(--brand-green); }
+.card-admin-blue { border-left-color: var(--brand-blue); }
+.card-admin-red { border-left-color: var(--brand-red); }
+.card-admin-orange { border-left-color: var(--brand-orange); }
+
+/* Tenant Gradient Card */
+.card-tenant-balance {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+}
+
+/* Table Enhancements */
+.table {
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.table thead th {
+    border: none;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+}
+
+.table tbody tr {
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.table tbody td {
+    border: none;
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+}
+
+.table tbody tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+.table tbody tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+/* Status Badges */
+.badge-soft-success { background-color: #dcfce7; color: #166534; }
+.badge-soft-warning { background-color: #fef9c3; color: #854d0e; }
+.badge-soft-danger { background-color: #fee2e2; color: #991b1b; }
+.badge-soft-info { background-color: #dbeafe; color: #1e40af; }
+
+/* Buttons */
+.btn-primary { background-color: var(--brand-primary); border-color: var(--brand-primary); }
+.btn-primary:hover { background-color: var(--brand-primary-hover); border-color: var(--brand-primary-hover); }
+
+/* Utilities */
+.text-xxl { font-size: 2.5rem; font-weight: 800; }
+.rounded-20 { border-radius: 20px !important; }

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}ยืนยันการลบมิเตอร์{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h3 class="fw-bold text-danger mb-3">ยืนยันการลบข้อมูลมิเตอร์</h3>
+
+                    <p class="mb-3">
+                        คุณต้องการลบข้อมูลมิเตอร์ของห้อง
+                        <strong>{{ meter.room.room_number }}</strong>
+                        ใช่หรือไม่
+                    </p>
+
+                    <ul class="list-group mb-4">
+                        <li class="list-group-item">
+                            <strong>ห้อง:</strong> {{ meter.room.room_number }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>ผู้เช่า:</strong> {{ meter.tenant|default:"-" }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>เลขอ่าน:</strong> {{ meter.reading_value }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>ค่าน้ำ:</strong> {{ meter.water_charge }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>วันที่อ่าน:</strong> {{ meter.reading_date }}
+                        </li>
+                    </ul>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger rounded-pill px-4">
+                                ลบข้อมูล
+                            </button>
+                            <a href="{% url 'payments:meter_list' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                                ยกเลิก
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

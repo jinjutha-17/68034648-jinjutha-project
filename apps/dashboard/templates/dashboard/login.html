@@ -1,0 +1,222 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เข้าสู่ระบบ | Apartment Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1e40af; --secondary: #3b82f6; }
+        body { font-family: 'Kanit', sans-serif; margin: 0; background: #fff; overflow: hidden; }
+        .login-container { display: flex; min-height: 100vh; }
+
+        .left-panel {
+            flex: 1.2; background: #1e40af;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 2rem; color: white; position: relative;
+            transition: background 0.4s ease;
+        }
+        .left-panel.admin-mode { background: #1e1b4b; }
+        .left-panel::after {
+            content: ''; position: absolute; top: 0; right: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .illustration {
+            width: 85%; max-width: 480px; height: auto; z-index: 10;
+            animation: float 5s ease-in-out infinite;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.2));
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-25px); } }
+        .brand-text { z-index: 10; text-align: center; margin-top: 3rem; }
+        .brand-text h1 { font-weight: 800; font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -1px; }
+        .brand-text p { font-weight: 300; opacity: 0.8; font-size: 1.1rem; }
+
+        .right-panel { flex: 1; display: flex; justify-content: center; align-items: center; padding: 3rem; background: white; }
+        .form-wrapper { width: 100%; max-width: 420px; }
+
+        /* TABS */
+        .role-tabs { display: flex; background: #f1f5f9; border-radius: 16px; padding: 5px; margin-bottom: 1.75rem; gap: 5px; }
+        .role-tab {
+            flex: 1; padding: 10px; border: none; border-radius: 12px;
+            background: transparent; font-family: 'Kanit', sans-serif;
+            font-size: 0.95rem; font-weight: 600; color: #64748b;
+            cursor: pointer; transition: all 0.25s ease;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .role-tab.active-tenant { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+        .role-tab.active-admin { background: #4338ca; color: white; box-shadow: 0 4px 10px rgba(67,56,202,0.3); }
+
+        .login-header { margin-bottom: 1.5rem; }
+        .login-header h2 { font-weight: 800; color: #1e293b; font-size: 2rem; margin-bottom: 0.3rem; }
+        .login-header p { color: #64748b; font-size: 0.95rem; }
+
+        .form-group-custom { margin-bottom: 1.25rem; position: relative; }
+        .form-control-custom {
+            width: 100%; padding: 14px 15px 14px 50px;
+            border: 1.5px solid #e2e8f0; border-radius: 15px;
+            background-color: #f8fafc; transition: all 0.3s ease;
+            font-size: 1rem; font-family: 'Kanit', sans-serif;
+            box-sizing: border-box;
+        }
+        .form-control-custom:focus { outline: none; border-color: var(--secondary); background-color: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+        .admin-mode-input:focus { border-color: #4338ca !important; box-shadow: 0 0 0 4px rgba(67,56,202,0.1) !important; }
+        .input-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem; z-index: 10; }
+
+        .btn-premium {
+            width: 100%; padding: 14px; border: none; border-radius: 15px;
+            font-size: 1.1rem; font-weight: 700; font-family: 'Kanit', sans-serif;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 1rem;
+        }
+        .btn-tenant { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        .btn-tenant:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-admin { background: #4338ca; color: #fff; box-shadow: 0 4px 12px rgba(67,56,202,0.3); }
+        .btn-admin:hover { background: #3730a3; transform: translateY(-2px); }
+
+        .test-accounts-box { background: #f8fafc; border: 1.5px dashed #e2e8f0; border-radius: 20px; padding: 1.25rem; margin-top: 1.5rem; }
+        .test-header { font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+        .test-list { display: flex; flex-direction: column; gap: 8px; }
+        .test-item { background: #fff; padding: 10px 14px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .test-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .role-badge { font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; }
+        .badge-admin { background: #fee2e2; color: #dc2626; }
+        .badge-staff { background: #fef9c3; color: #ca8a04; }
+        .badge-tenant { background: #dcfce7; color: #15803d; }
+        .pass-text { color: #64748b; font-weight: 600; font-size: 0.85rem; }
+
+        .footer-links { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: #64748b; }
+        .footer-links a { color: #3b82f6; text-decoration: none; font-weight: 700; }
+
+        @media (max-width: 992px) { .left-panel { display: none; } }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="left-panel" id="leftPanel">
+        <img src="https://illustrations.popsy.co/blue/work-from-home.svg" alt="Apartment Hub" class="illustration" loading="lazy">
+        <div class="brand-text">
+            <h1>Apartment Hub</h1>
+            <p>Your complete apartment management solution.</p>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="form-wrapper">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger rounded-3 small mb-3">
+                        <i class="fas fa-exclamation-circle me-1"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Role Tabs -->
+            <div class="role-tabs">
+                <button type="button" class="role-tab active-tenant" id="tabTenant" onclick="switchTab('tenant')">
+                    <i class="fas fa-home"></i> ผู้เช่า
+                </button>
+                <button type="button" class="role-tab" id="tabAdmin" onclick="switchTab('admin')">
+                    <i class="fas fa-shield-alt"></i> แอดมิน 
+                </button>
+            </div>
+
+            <div class="login-header">
+                <h2 id="loginTitle">ยินดีต้อนรับ</h2>
+                <p id="loginSubtitle">เข้าสู่ระบบในฐานะผู้เช่า</p>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <input type="hidden" name="login_role" id="loginRole" value="tenant">
+
+                <div class="form-group-custom">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" name="username" id="usernameInput"
+                           class="form-control-custom" placeholder="อีเมลหรือชื่อผู้ใช้" required>
+                </div>
+
+                <div class="form-group-custom">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" name="password" id="passwordInput"
+                           class="form-control-custom" placeholder="รหัสผ่าน" required>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label small text-muted" for="rememberMe">จดจำฉัน</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-premium btn-tenant" id="submitBtn">
+                    เข้าสู่ระบบ <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+
+                <!-- Test box Tenant -->
+                <div class="test-accounts-box" id="testBoxTenant">
+                    <div class="test-header"><i class="fas fa-key text-warning"></i> บัญชีทดสอบ</div>
+                    <div class="test-list">
+                        <div class="test-item">
+                            <div class="test-row">
+                                <span class="role-badge badge-tenant">TENANT</span>
+                                <span class="pass-text">Password: 1234</span>
+                            </div>
+                            <span class="small text-muted">malee@gmail.com</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test box Admin -->
+                <div class="test-accounts-box" id="testBoxAdmin" style="display:none;">
+                    <div class="test-header"><i class="fas fa-key text-warning"></i> บัญชีทดสอบ</div>
+                    <div class="test-list">
+                        <div class="test-item">
+                            <div class="test-row">
+                                <span class="role-badge badge-admin">ADMIN</span>
+                                <span class="pass-text">Password: 1234</span>
+                            </div>
+                            <span class="small text-muted">admin</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="footer-links">
+                ยังไม่มีบัญชี? <a href="/register/">สมัครสมาชิก</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function switchTab(role) {
+    const isAdmin = role === 'admin';
+    document.getElementById('leftPanel').classList.toggle('admin-mode', isAdmin);
+    document.getElementById('loginRole').value = role;
+
+    document.getElementById('tabTenant').className = 'role-tab' + (!isAdmin ? ' active-tenant' : '');
+    document.getElementById('tabAdmin').className = 'role-tab' + (isAdmin ? ' active-admin' : '');
+
+    document.getElementById('submitBtn').className = 'btn-premium ' + (isAdmin ? 'btn-admin' : 'btn-tenant');
+    document.getElementById('loginTitle').textContent = isAdmin ? 'แอดมิน / สตาฟ' : 'ยินดีต้อนรับ';
+    document.getElementById('loginSubtitle').textContent = isAdmin ? 'เข้าสู่ระบบในฐานะผู้ดูแลระบบ' : 'เข้าสู่ระบบในฐานะผู้เช่า';
+
+    ['usernameInput','passwordInput'].forEach(id => {
+        document.getElementById(id).classList.toggle('admin-mode-input', isAdmin);
+    });
+
+    document.getElementById('testBoxTenant').style.display = isAdmin ? 'none' : 'block';
+    document.getElementById('testBoxAdmin').style.display = isAdmin ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

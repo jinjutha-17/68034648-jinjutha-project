@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block header_title %}Tenant Profile{% endblock %}
+{% block header_subtitle %}Detailed information, contact data, and history{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4 gap-2">
+    <a href="{% url 'tenants:list' %}" class="btn btn-light shadow-sm"><i class="fa-solid fa-arrow-left me-2"></i>Back</a>
+    <a href="{% url 'tenants:edit' tenant.pk %}" class="btn btn-primary-saas btn-saas shadow-sm"><i class="fa-solid fa-pen me-2"></i>Edit Profile</a>
+</div>
+
+<div class="row g-4">
+    <!-- Profile Sidebar -->
+    <div class="col-lg-4">
+        <div class="saas-card h-100 p-4 text-center">
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3 border border-primary-subtle" style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: bold;">
+                {{ tenant.first_name|make_list|first|upper }}
+            </div>
+            <h4 class="fw-bold mb-1">{{ tenant.full_name }}</h4>
+            <div class="mb-3">
+                {% if tenant.is_active %}
+                    <span class="badge badge-soft-success rounded-pill px-3 py-1">Active Tenant</span>
+                {% else %}
+                    <span class="badge badge-soft-secondary rounded-pill px-3 py-1">Inactive</span>
+                {% endif %}
+            </div>
+
+            <hr class="my-4 opacity-10">
+
+            <div class="text-start">
+                <h6 class="text-muted fw-bold text-uppercase small mb-3">Contact Information</h6>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center text-muted" style="width: 36px; height: 36px;">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Phone Number</div>
+                        <div class="fw-medium text-dark">{{ tenant.phone|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center text-muted" style="width: 36px; height: 36px;">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">Email Address</div>
+                        <div class="fw-medium text-dark">{{ tenant.email|default:"-" }}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center text-muted" style="width: 36px; height: 36px;">
+                        <i class="fa-regular fa-id-card"></i>
+                    </div>
+                    <div>
+                        <div class="small text-muted">ID Card</div>
+                        <div class="fw-medium text-dark">{{ tenant.id_card|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 opacity-10">
+
+            <div class="text-start">
+                <h6 class="text-muted fw-bold text-uppercase small mb-3 text-danger"><i class="fa-solid fa-truck-medical me-2"></i>Emergency Contact</h6>
+                <div class="fw-medium text-dark">{{ tenant.emergency_contact|default:"No contact listed" }}</div>
+                <div class="text-muted small">{{ tenant.emergency_phone|default:"-" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Tab -->
+    <div class="col-lg-8">
+        <div class="saas-card mb-4 overflow-hidden">
+            <div class="p-4 border-bottom bg-light bg-opacity-50">
+                <h5 class="card-title mb-0 border-0"><i class="fa-solid fa-building-user text-info me-2"></i>Lease Information</h5>
+            </div>
+            <div class="p-4">
+                <div class="row g-4">
+                    <div class="col-sm-6">
+                        <div class="border rounded-3 p-3 bg-light bg-opacity-50">
+                            <span class="text-muted small d-block mb-1">Assigned Room</span>
+                            {% if tenant.room %}
+                                <a href="{% url 'rooms:detail' tenant.room.pk %}" class="fw-bold fs-5 text-decoration-none text-primary">Room {{ tenant.room.room_number }}</a>
+                            {% else %}
+                                <span class="fw-bold fs-5 text-muted fst-italic">Unassigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="row g-2">
+                            <div class="col-12 border rounded-3 p-2 bg-light bg-opacity-50">
+                                <span class="text-muted small ms-1">Move-in Date:</span>
+                                <span class="fw-medium text-dark float-end me-1">{{ tenant.move_in_date|default:"-" }}</span>
+                            </div>
+                            <div class="col-12 border rounded-3 p-2 bg-light bg-opacity-50">
+                                <span class="text-muted small ms-1">Move-out Date:</span>
+                                <span class="fw-medium text-dark float-end me-1">{{ tenant.move_out_date|default:"-" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if tenant.notes %}
+                <div class="mt-4 pt-3 border-top">
+                    <h6 class="text-muted small fw-bold text-uppercase mb-2">Internal Notes</h6>
+                    <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ tenant.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment History Table -->
+        <div class="saas-card overflow-hidden">
+            <div class="p-4 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 border-0"><i class="fa-solid fa-file-invoice-dollar text-success me-2"></i>Payment History</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-saas mb-0">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td class="fw-medium text-dark">{{ p.get_payment_type_display }}</td>
+                            <td class="fw-bold">฿{{ p.amount }}</td>
+                            <td>{{ p.due_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if p.status == 'paid' %}
+                                    <span class="badge badge-soft-success rounded-pill px-3">Paid</span>
+                                {% elif p.status == 'pending' %}
+                                    <span class="badge badge-soft-warning rounded-pill px-3">Pending</span>
+                                {% else %}
+                                    <span class="badge badge-soft-danger rounded-pill px-3">Overdue</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">No payment records found for this tenant.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

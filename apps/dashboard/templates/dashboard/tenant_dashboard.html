@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}หน้าหลักของคุณ | LuxeDorm{% endblock %}
+
+{% block content %}
+<div class="row mb-5 align-items-center">
+    <div class="col-md-8">
+        <h1 class="fw-bold text-dark mb-1">สวัสดีคุณ {{ tenant.full_name|default:request.user.first_name }}</h1>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-light text-dark px-3 py-2 rounded-pill border">ห้อง {{ room_number }}</span>
+            <span class="text-success small"><i class="fa-solid fa-circle me-1" style="font-size: 0.6rem;"></i> สถานะ: ผู้เช่าปัจจุบัน</span>
+        </div>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <div class="text-muted small">วัน{% now "lที่ j F Y" %}</div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-8">
+        <div class="sys-card card-tenant-balance p-5 mb-4 position-relative overflow-hidden" style="border-radius: 30px;">
+            <div class="position-relative z-1">
+                <div class="text-white-50 mb-2">ยอดที่ต้องชำระปัจจุบัน</div>
+                <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+                    <div>
+                        <span class="text-xxl">฿{{ total_due|floatformat:0 }}</span>
+                        <span class="ms-2">บาท</span>
+                    </div>
+
+                    {% if total_due > 0 %}
+                    <a href="{% url 'payments:tenant_payment_create' %}"
+                       class="btn btn-light rounded-pill px-5 py-3 fw-bold text-orange d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-credit-card"></i>
+                        แจ้งชำระเงิน
+                    </a>
+                    {% else %}
+                    <button class="btn btn-light rounded-pill px-5 py-3 fw-bold text-secondary d-flex align-items-center justify-content-center gap-2 shadow-sm" disabled>
+                        <i class="fa-solid fa-circle-check"></i>
+                        ไม่มียอดค้างชำระ
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="position-absolute" style="right: -20px; bottom: -20px; font-size: 15rem; color: rgba(255,255,255,0.05); z-index: 0;">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="sys-card p-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="icon-box icon-box-blue rounded-circle"><i class="fa-solid fa-droplet"></i></div>
+                        <h5 class="fw-bold mb-0">ค่าน้ำประปา</h5>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">เลขอ่านปัจจุบัน</span>
+                        <span class="fw-bold">{{ curr_water }} m³</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">เลขอ่านเดือนที่แล้ว</span>
+                        <span class="fw-bold">{{ prev_water }} m³</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="fw-bold">รวมการใช้งาน</span>
+                        <span class="text-primary fw-bold fs-4">{{ water_units }} หน่วย</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="sys-card p-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="icon-box icon-box-orange rounded-circle text-warning"><i class="fa-solid fa-bolt"></i></div>
+                        <h5 class="fw-bold mb-0">ค่าไฟฟ้า</h5>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">เลขอ่านปัจจุบัน</span>
+                        <span class="fw-bold">{{ curr_elec }} kWh</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">เลขอ่านเดือนที่แล้ว</span>
+                        <span class="fw-bold">{{ prev_elec }} kWh</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="fw-bold">รวมการใช้งาน</span>
+                        <span class="text-orange fw-bold fs-4">{{ electric_units }} หน่วย</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sys-card mt-4 overflow-hidden">
+            <div class="p-4 d-flex justify-content-between align-items-center bg-white border-bottom">
+                <h5 class="fw-bold mb-0">พัสดุของคุณ</h5>
+                <span class="badge bg-soft-orange text-orange rounded-pill px-3">{{ active_parcels_count }} NEW</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">วันที่</th>
+                            <th>ผู้จัดส่ง</th>
+                            <th>เลขพัสดุ</th>
+                            <th class="pe-4">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parcel in recent_parcels %}
+                        <tr>
+                            <td class="ps-4">{{ parcel.received_at|date:"j MY" }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if 'Kerry' in parcel.courier %}
+                                        <i class="fa-solid fa-truck-fast text-orange"></i>
+                                    {% elif 'Shopee' in parcel.courier %}
+                                        <i class="fa-solid fa-bag-shopping text-danger"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-box text-muted"></i>
+                                    {% endif %}
+                                    {{ parcel.get_courier_display }}
+                                </div>
+                            </td>
+                            <td><code class="text-dark">{{ parcel.tracking_number }}</code></td>
+                            <td class="pe-4">
+                                {% if parcel.status == 'pending' %}
+                                    <span class="badge badge-soft-warning rounded-pill px-3">รอนำจ่าย</span>
+                                {% else %}
+                                    <span class="badge badge-soft-success rounded-pill px-3">รับแล้ว</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">ไม่พบข้อมูลพัสดุ</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="sys-card mt-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">ข้อมูลสัญญาเช่า</h5>
+                    <small class="text-muted">รายละเอียดข้อตกลงและหลักประกันการเช่าพักอาศัย</small>
+                </div>
+                <button class="btn btn-light border rounded-pill px-4 py-2 small" onclick="window.print()">
+                    <i class="fa-solid fa-download me-2"></i> ดาวน์โหลด PDF
+                </button>
+            </div>
+            <div class="row g-4">
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted mb-1">วันเริ่มต้นสัญญา</div>
+                    <div class="fw-bold">1 มกราคม 2567</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted mb-1">เงินประกัน</div>
+                    <div class="fw-bold text-orange">12,000 บาท</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted mb-1">ค่าเช่ารายเดือน</div>
+                    <div class="fw-bold">฿{{ tenant.room.monthly_rent|default:"6,000" }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted mb-1">สถานะประกัน</div>
+                    <div class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i> คุ้มครอง</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="sys-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="fw-bold mb-0">ติดตามการแจ้งซ่อม</h6>
+                <a href="/maintenance/create/" class="text-orange small fw-bold text-decoration-none">แจ้งใหม่</a>
+            </div>
+
+            {% for task in maintenance_tasks %}
+            <div class="bg-light p-3 rounded-4 mb-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <div class="fw-bold small">{{ task.issue }}</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">รหัส: MT-{{ task.id|add:9000 }}</div>
+                    </div>
+                    <span class="badge bg-soft-orange text-orange" style="font-size: 0.6rem;">กำลังดำเนินการ</span>
+                </div>
+                <div class="progress mt-3" style="height: 6px;">
+                    <div class="progress-bar bg-orange" role="progressbar" style="width: 60%;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2" style="font-size: 0.6rem;">
+                    <span class="text-muted">รับเรื่อง</span>
+                    <span class="text-muted">จัดหาอะไหล่</span>
+                    <span class="text-muted">เสร็จสิ้น</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted py-3 small">ไม่มีรายการแจ้งซ่อมที่รอดำเนินการ</div>
+            {% endfor %}
+        </div>
+
+        <div class="sys-card p-4 mb-4">
+            <h6 class="fw-bold mb-4">ประกาศจากหอพัก</h6>
+            <div class="d-flex gap-3 mb-4">
+                <div class="bg-soft-orange text-orange p-2 rounded-3 text-center" style="min-width: 50px; height: 50px;">
+                    <div class="small fw-bold">พ.ค.</div>
+                    <div class="fw-bold">25</div>
+                </div>
+                <div>
+                    <div class="fw-bold small">แจ้งฉีดปลวกประจำปี</div>
+                    <div class="text-muted small">ขอความกรุณาผู้เช่าทุกท่านเก็บของมีค่าและเตรียมเปิดห้อง...</div>
+                </div>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="bg-soft-orange text-orange p-2 rounded-3 text-center" style="min-width: 50px; height: 50px;">
+                    <div class="small fw-bold">พ.ค.</div>
+                    <div class="fw-bold">18</div>
+                </div>
+                <div>
+                    <div class="fw-bold small">สรุปยอดค่าไฟเมษายน</div>
+                    <div class="text-muted small">ตรวจสอบยอดการใช้งานไฟฟ้าของเดือนเมษายนได้แล้วในระบบ...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sys-card p-4 text-center bg-light border-0">
+            <div class="icon-box bg-white text-orange rounded-circle mx-auto mb-3 shadow-sm">
+                <i class="fa-solid fa-headset"></i>
+            </div>
+            <h6 class="fw-bold">ต้องการความช่วยเหลือ?</h6>
+            <p class="text-muted small mb-4">ติดต่อฝ่ายนิติบุคคลได้ตลอด 24 ชม.</p>
+            <h4 class="fw-bold text-dark">02-123-4567</h4>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-orange { color: #ea580c !important; }
+    .bg-soft-orange { background-color: #fff7ed; }
+    .btn-light.text-orange:hover { background-color: #fff7ed; border-color: #ea580c; }
+    .progress-bar.bg-orange { background-color: #ea580c; }
+</style>
+{% endblock %}

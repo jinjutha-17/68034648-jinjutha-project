@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block header_title %}บันทึกเลขมิเตอร์{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
+    <div class="p-6 border-b border-gray-50 flex justify-between items-center bg-white">
+        <div>
+            <h2 class="text-lg font-bold text-gray-800">จดมิเตอร์ประจำเดือน</h2>
+            <p class="text-sm text-gray-400">กรุณาระบุเลขมิเตอร์ครั้งล่าสุดเพื่อคำนวณค่าใช้จ่าย</p>
+        </div>
+        <div class="flex space-x-2">
+            <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors">
+                นำเข้าข้อมูล Excel
+            </button>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all">
+                บันทึกทั้งหมด
+            </button>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase font-semibold">
+                <tr>
+                    <th class="px-6 py-4">ห้อง</th>
+                    <th class="px-6 py-4">ชื่อผู้เช่า</th>
+                    <th class="px-6 py-4">เลขมิเตอร์ครั้งก่อน</th>
+                    <th class="px-6 py-4">เลขมิเตอร์ครั้งนี้</th>
+                    <th class="px-6 py-4">หน่วยที่ใช้</th>
+                    <th class="px-6 py-4 text-center">จัดการ</th>
+                </tr>
+            </thead>
+            
+            <tbody class="divide-y divide-gray-50 text-sm">
+                {% for room in rooms %}
+                <tr class="hover:bg-blue-50/30 transition-colors">
+                    <td class="px-6 py-4 font-bold text-gray-700">{{ room.room_number }}</td>
+                    <td class="px-6 py-4 text-gray-600">{{ room.current_tenant|default:"ห้องว่าง" }}</td>
+                    <td class="px-6 py-4 text-gray-400 font-mono">{{ room.last_meter_reading }}</td>
+                    
+                    <td class="px-6 py-4">
+                        <input type="number" 
+                               class="w-32 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 font-mono" 
+                               placeholder="0.00">
+                    </td>
+                    
+                    <td class="px-6 py-4">
+                        <span class="text-blue-600 font-semibold italic text-sm">คำนวณอัตโนมัติ</span>
+                    </td>
+                    
+                    <td class="px-6 py-4 text-center">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 shadow-sm transition-all active:scale-95">
+                            บันทึก
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-10 text-center text-gray-400">ไม่พบข้อมูลห้องพัก</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-6 flex justify-end">
+    <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl">
+        <p class="text-blue-800 text-sm font-semibold">
+            หมายเหตุ: ระบบจะนำเลขมิเตอร์นี้ไปออกใบแจ้งหนี้โดยอัตโนมัติ
+        </p>
+    </div>
+</div>
+{% endblock %}

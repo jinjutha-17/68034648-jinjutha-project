@@ -1,0 +1,71 @@
+body { overflow-x: hidden; background-color: #F9FAFB !important; font-family: 'Kanit', sans-serif; }
+
+/* Sidebar */
+#sidebar {
+  width: 240px;
+  min-height: 100vh;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+}
+#sidebar.collapsed { width: 0; overflow: hidden; }
+.sidebar-nav .nav-link:hover { background: rgba(219, 39, 119, 0.1); }
+.sidebar-nav .nav-link.active { background: rgba(219, 39, 119, 0.15); font-weight: 600; }
+
+/* Topbar */
+.topbar { min-height: 52px; }
+
+/* Cards */
+.card { border-radius: 0.75rem; background: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07); }
+.stat-icon { width: 52px; height: 52px; display:flex; align-items:center; justify-content:center; border-radius: 0.5rem; }
+
+/* Tables */
+.table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; }
+
+/* Buttons */
+.btn-primary { background-color: #1e3a8a; border-color: #1e3a8a; }
+.btn-primary:hover { background-color: #db2777; border-color: #db2777; }
+
+/* --- ส่วนเพิ่มเติมสำหรับหน้า Login/Register ให้รูปขึ้น --- */
+
+.login-split-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100vw; /* บังคับให้เต็มหน้าจอ */
+}
+
+.login-left-panel {
+    flex: 1.2; /* แบ่งพื้นที่ให้ฝั่งซ้าย */
+    background-color: #1e40af; /* สีน้ำเงินหลัก */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.login-illustration {
+    width: 100%;
+    max-width: 500px; /* คุมขนาดรูปไม่ให้ใหญ่เกินไป */
+    height: auto;
+    animation: float 6s ease-in-out infinite; /* ใส่แอนิเมชั่นลอยๆ */
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.login-right-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 40px;
+}
+
+/* ซ่อนฝั่งซ้ายเมื่อดูในมือถือ */
+@media (max-width: 992px) {
+    .login-left-panel {
+        display: none;
+    }
+}

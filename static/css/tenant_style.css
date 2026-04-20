@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
+
+:root {
+    --luxe-orange: linear-gradient(135deg, #FF8C00 0%, #FFB347 100%);
+    --luxe-dark: #1A1A1A;
+    --luxe-bg: #F0F2F5;
+    --luxe-card-radius: 20px;
+}
+
+body {
+    font-family: 'Kanit', sans-serif;
+    background-color: var(--luxe-bg);
+    color: #333;
+}
+
+.tenant-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.welcome-header {
+    margin-bottom: 2rem;
+}
+
+.welcome-header h1 {
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: var(--luxe-dark);
+}
+
+.orange-card {
+    background: var(--luxe-orange);
+    border-radius: var(--luxe-card-radius);
+    padding: 2.5rem;
+    color: white;
+    box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+    border: none;
+    margin-bottom: 2rem;
+}
+
+.orange-card .label {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.orange-card .amount {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.orange-card .btn-pay {
+    background: white;
+    color: #FF8C00;
+    border: none;
+    border-radius: 12px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.orange-card .btn-pay:hover {
+    transform: scale(1.05);
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.luxe-card {
+    background: white;
+    border-radius: var(--luxe-card-radius);
+    padding: 1.5rem;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.luxe-card h3 {
+    font-weight: 500;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meter-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--luxe-dark);
+}
+
+.table-luxe {
+    width: 100%;
+}
+
+.table-luxe th {
+    font-weight: 500;
+    color: #666;
+    padding-bottom: 1rem;
+}
+
+.table-luxe td {
+    padding: 1rem 0;
+    border-top: 1px solid #EEE;
+}
+
+.badge-pending {
+    background: #FFF3E0;
+    color: #E65100;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}

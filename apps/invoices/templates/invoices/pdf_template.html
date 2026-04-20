@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice PDF</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .box {
+            border: 1px solid #000;
+            padding: 20px;
+        }
+
+        h2, h3, p {
+            margin: 0 0 10px 0;
+        }
+
+        hr {
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>INVOICE</h2>
+
+        <p>Room: {{ bill.room.room_number }}</p>
+        <p>Date: {{ today }}</p>
+        <p>Month: {{ bill.service_month|date:"F Y" }}</p>
+
+        <hr>
+
+        <p>Electric Units: {{ elec_units }}</p>
+        <p>Water Units: {{ water_units }}</p>
+        <p>Rent: {{ bill.room.base_price }}</p>
+
+        <hr>
+
+        <h3>Total: {{ bill.total_amount }} บาท</h3>
+
+        {% if bill.is_paid %}
+            <p style="color: green;">Paid</p>
+        {% else %}
+            <p style="color: red;">Unpaid</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

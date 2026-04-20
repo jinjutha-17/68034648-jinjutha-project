@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}พัสดุของฉัน | My Parcels{% endblock %}
+
+{% block header_title %}My Parcels{% endblock %}
+{% block header_subtitle %}รายการพัสดุของคุณที่รอการรับจ่าย{% endblock %}
+
+{% block content %}
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-12 col-lg-8 mx-auto">
+        <!-- Status Summary -->
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark">รายการพัสดุทั้งหมด</h5>
+            <span class="badge bg-white text-primary border rounded-pill px-3 py-2 shadow-sm">
+                ห้อง {{ tenant.room.room_number }}
+            </span>
+        </div>
+
+        {% if parcels %}
+            <div class="space-y-4">
+                {% for parcel in parcels %}
+                <div class="card sys-card border-0 shadow-sm overflow-hidden mb-4 rounded-4 position-relative">
+                    <!-- Mobile-friendly indicator dot -->
+                    {% if parcel.status == 'pending' %}
+                    <div class="position-absolute top-0 end-0 m-3 d-flex align-items-center gap-2">
+                        <div class="status-dot-pulse"></div>
+                        <span class="small fw-bold text-danger">ค้างรับ</span>
+                    </div>
+                    {% else %}
+                    <div class="position-absolute top-0 end-0 m-3 text-success small fw-bold">
+                        <i class="fa-solid fa-circle-check me-1"></i> ได้รับแล้ว
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-4 mb-4">
+                            <div class="rounded-4 bg-primary bg-opacity-10 d-flex align-items-center justify-content-center text-primary" style="width: 64px; height: 64px;">
+                                <i class="fa-solid fa-box-open fa-2x"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small mb-1"><i class="fa-regular fa-calendar-check me-1"></i> รับเข้าเมื่อ: {{ parcel.received_at|date:"d M Y | H:i" }} น.</div>
+                                <h5 class="fw-bold text-dark mb-0">พัสดุจาก {{ parcel.get_courier_display }}</h5>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <div class="text-muted small mb-1">หมายเลขพัสดุ</div>
+                                    <div class="fw-bold font-monospace text-primary text-truncate">{{ parcel.tracking_number }}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <div class="text-muted small mb-1">ประเภทพัสดุ</div>
+                                    <div class="fw-bold text-dark">{{ parcel.parcel_type }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if parcel.parcel_image %}
+                        <div class="mb-4 rounded-4 overflow-hidden border border-light" style="max-height: 200px;">
+                            <img src="{{ parcel.parcel_image.url }}" class="w-100 h-100 object-fit-cover" alt="พัสดุปัด">
+                        </div>
+                        {% endif %}
+
+                        {% if parcel.status == 'pending' %}
+                        <div class="d-grid pt-2">
+                            <a href="{% url 'confirm_receipt' parcel.id %}" class="btn btn-success py-3 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 onclick-confirm">
+                                <i class="fa-solid fa-circle-check"></i>
+                                ฉันตรวจสอบและได้รับพัสดุแล้ว
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success border-0 rounded-pill mb-0 py-3 text-center small fw-medium">
+                            <i class="fa-solid fa-check-circle me-1"></i> จ่ายพัสดุแล้วเมื่อ {{ parcel.delivered_at|date:"d M Y | H:i" }} น.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card sys-card border-0 shadow-sm rounded-4 p-5 text-center">
+                <div class="mb-4">
+                    <i class="fa-solid fa-box-open fa-4x text-muted opacity-25"></i>
+                </div>
+                <h5 class="text-muted fw-bold">ไม่มีรายการพัสดุในขณะนี้</h5>
+                <p class="text-muted small mb-0">เมื่อมีพัสดุมาส่งถึงคุณ ข้อมูลจะปรากฏขึ้นที่หน้าจอนี้ทันที</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .status-dot-pulse {
+        width: 12px;
+        height: 12px;
+        background-color: #dc3545;
+        border-radius: 50%;
+        position: relative;
+    }
+    
+    .status-dot-pulse::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #dc3545;
+        border-radius: 50%;
+        animation: pulse-red 1.5s infinite ease-out;
+    }
+    
+    @keyframes pulse-red {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(3); opacity: 0; }
+    }
+    
+    .space-y-4 > * + * {
+        margin-top: 1.5rem;
+    }
+    
+    .btn-success {
+        background-color: #16a34a;
+        border-color: #16a34a;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background-color: #15803d;
+        border-color: #15803d;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(22, 163, 74, 0.2) !important;
+    }
+    
+    .object-fit-cover {
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Confirm before confirming receipt
+        const confirmBtns = document.querySelectorAll('.onclick-confirm');
+        confirmBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('ยืนยันว่าคุณได้รับพัสดุรายการนี้แล้วใช่หรือไม่?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

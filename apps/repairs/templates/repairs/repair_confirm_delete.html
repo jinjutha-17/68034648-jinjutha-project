@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}ลบรายการแจ้งซ่อม{% endblock %}
+{% block content %}
+<div class="card border-0 shadow-sm" style="max-width:480px">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>ลบรายการแจ้งซ่อม</h5>
+    <p>ต้องการลบการแจ้งซ่อม <strong>{{ repair.issue }}</strong> ของห้อง <strong>{{ repair.room.room_number }}</strong> ใช่ไหม?</p>
+    <form method="post" class="d-flex gap-2 mt-4">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">ใช่ ลบเลย</button>
+      <a href="{% url 'repairs:list' %}" class="btn btn-outline-secondary">ยกเลิก</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

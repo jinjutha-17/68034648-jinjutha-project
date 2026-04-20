@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}รายการชำระเงินของฉัน{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="sys-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">รายการชำระเงินของฉัน</h3>
+            <a href="{% url 'tenants:tenant_home' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                กลับหน้าหลัก
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ประเภท</th>
+                        <th>ห้อง</th>
+                        <th>ยอดเงิน</th>
+                        <th>วันที่</th>
+                        <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in payments %}
+                    <tr>
+                        <td>{{ item.payment_type|default:"ค่าเช่า" }}</td>
+                        <td>{{ item.room.room_number|default:"-" }}</td>
+                        <td>฿{{ item.amount }}</td>
+                        <td>{{ item.due_date|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if item.status == 'completed' %}
+                                <span class="badge bg-success">จ่ายแล้ว</span>
+                            {% elif item.status == 'overdue' %}
+                                <span class="badge bg-danger">ค้างชำระ</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">รอตรวจสอบ</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">ไม่มีข้อมูลการชำระเงิน</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

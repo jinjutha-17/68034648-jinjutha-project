@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Apartment Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body { background:#eef1f5; }
+.card { border-radius:15px; }
+</style>
+
+</head>
+<body>
+
+<div class="container mt-4">
+
+<h1 class="text-center mb-4">🏢 Apartment Dashboard</h1>
+
+<!-- DASHBOARD -->
+<div class="row text-center mb-4">
+
+<div class="col">
+<div class="card p-3 shadow">
+<h5>ผู้เช่า</h5>
+<h2 id="tenants">0</h2>
+</div>
+</div>
+
+<div class="col">
+<div class="card p-3 shadow">
+<h5>ห้องว่าง</h5>
+<h2 id="available">0</h2>
+</div>
+</div>
+
+<div class="col">
+<div class="card p-3 shadow">
+<h5>ค้างชำระ</h5>
+<h2 id="overdue">0</h2>
+</div>
+</div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card p-4 shadow">
+<h4>รายชื่อผู้เช่า</h4>
+
+<table class="table table-hover mt-3">
+<thead>
+<tr>
+<th>ID</th>
+<th>ชื่อ</th>
+<th>เบอร์</th>
+</tr>
+</thead>
+
+<tbody id="tenantTable"></tbody>
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+// โหลด Dashboard
+fetch('/api/dashboard/stats')
+.then(res=>res.json())
+.then(d=>{
+    document.getElementById('tenants').innerText = d.data.total_tenants;
+    document.getElementById('available').innerText = d.data.available_rooms;
+    document.getElementById('overdue').innerText = d.data.overdue_payments;
+});
+
+// โหลดตาราง
+fetch('/api/tenants')
+.then(res=>res.json())
+.then(data=>{
+    let table = document.getElementById('tenantTable');
+    data.data.forEach(t=>{
+        table.innerHTML += `
+        <tr>
+        <td>${t.TenantID}</td>
+        <td>${t.FirstName} ${t.LastName}</td>
+        <td>${t.Phone}</td>
+        </tr>`;
+    });
+});
+
+</script>
+
+</body>
+</html>

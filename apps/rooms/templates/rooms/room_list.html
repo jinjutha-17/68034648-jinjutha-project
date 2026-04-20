@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Room Management{% endblock %}
+{% block header_subtitle %}จัดการผังห้องพักและสถานะ{% endblock %}
+
+{% block content %}
+<!-- Metrics Dashboard -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="sys-card p-4 h-100 border-start border-4 border-secondary">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-medium text-uppercase" style="letter-spacing: 0.5px;">จำนวนห้องทั้งหมด</span>
+                    <h2 class="fw-bold text-dark mb-0 mt-2">{{ total_rooms }}</h2>
+                </div>
+                <i class="fa-solid fa-building text-secondary" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="sys-card p-4 h-100 border-start border-4 border-success">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-medium text-uppercase" style="letter-spacing: 0.5px;">ห้องว่างพร้อมเช่า</span>
+                    <h2 class="fw-bold text-success mb-0 mt-2">{{ available_count }}</h2>
+                </div>
+                <i class="fa-solid fa-door-open text-success" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="sys-card p-4 h-100 border-start border-4" style="border-color: #1A3C6C !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-medium text-uppercase" style="letter-spacing: 0.5px;">ห้องที่มีผู้เช่า</span>
+                    <h2 class="fw-bold mb-0 mt-2" style="color: #1A3C6C;">{{ occupied_count }}</h2>
+                </div>
+                <i class="fa-solid fa-user-check" style="font-size: 2.5rem; opacity: 0.15; color: #1A3C6C;"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="sys-card p-4 h-100 border-start border-4 border-danger">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-medium text-uppercase" style="letter-spacing: 0.5px;">แจ้งซ่อมบำรุง</span>
+                    <h2 class="fw-bold text-danger mb-0 mt-2">{{ maintenance_count }}</h2>
+                </div>
+                <i class="fa-solid fa-wrench text-danger" style="font-size: 2.5rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Actions -->
+<div class="sys-card mb-4">
+    <div class="p-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-sm-auto">
+                <label class="form-label text-muted small fw-medium text-uppercase mb-2" style="letter-spacing: 0.5px;">สถานะ</label>
+                <form id="filterForm" method="get" class="d-flex flex-wrap gap-2">
+                    <select name="status" class="form-select" id="statusFilter" style="max-width: 150px;">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="ว่าง" {% if status_filter == 'ว่าง' %}selected{% endif %}>ห้องว่าง</option>
+                        <option value="ไม่ว่าง" {% if status_filter == 'ไม่ว่าง' %}selected{% endif %}>มีผู้เช่า</option>
+                        <option value="ซ่อมบำรุง" {% if status_filter == 'ซ่อมบำรุง' %}selected{% endif %}>ซ่อมบำรุง</option>
+                    </select>
+                    
+                    <select name="floor" class="form-select" id="floorFilter" style="max-width: 150px;">
+                        <option value="">ทุกชั้น</option>
+                        {% for floor in floors %}
+                            <option value="{{ floor }}" {% if floor_filter == floor|stringformat:'s' %}selected{% endif %}>ชั้น {{ floor }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <!-- Search Box -->
+                    <div class="position-relative" style="min-width: 220px;">
+                        <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left:12px; top:50%; transform:translateY(-50%); z-index:1;"></i>
+                        <input type="text" name="search" class="form-control ps-4" 
+                               placeholder="ค้นหาเลขห้อง..." 
+                               value="{{ search_query }}"
+                               style="border: 2px solid #e2e8f0; border-radius: 10px;">
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary shadow-sm px-4">
+                        <i class="fa-solid fa-filter me-2"></i>ตัวกรอง
+                    </button>
+
+                    {% if search_query or status_filter or floor_filter %}
+                    <a href="{% url 'rooms:list' %}" class="btn btn-outline-secondary px-3">
+                        <i class="fa-solid fa-xmark me-1"></i>ล้าง
+                    </a>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="col-12 col-sm-auto ms-sm-auto">
+                <a href="{% url 'rooms:create' %}" class="btn btn-primary shadow-sm d-inline-flex align-items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> เพิ่มห้องพัก
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Floor Plan -->
+<div class="row g-4">
+    {% for floor, rooms in rooms_by_floor.items %}
+    <div class="col-12">
+        <div class="sys-card overflow-hidden">
+            <!-- Floor Header -->
+            <div class="p-4 border-bottom" style="background: linear-gradient(135deg, rgba(26, 60, 108, 0.05) 0%, rgba(102, 126, 234, 0.05) 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1" style="color: #1A3C6C;">
+                            <i class="fa-solid fa-layer-group me-2"></i>
+                            ชั้น {{ floor }}
+                        </h4>
+                        <p class="text-muted small mb-0">
+                            <i class="fa-solid fa-info-circle me-2"></i>
+                            {% if floor == 1 or floor == 2 %}
+                                ชั้นที่ {{ floor }} - 8 ห้อง
+                            {% else %}
+                                ชั้นที่ {{ floor }} - 7 ห้อง
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-primary float-end me-2">
+                            <i class="fa-solid fa-door-open me-1"></i>
+                            ว่าง {{ rooms|dictsort:"status"|length }}
+                        </span>
+                        <span class="badge bg-info float-end me-2">
+                            <i class="fa-solid fa-user-check me-1"></i>
+                            เช่า {{ rooms|dictsort:"status"|length }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rooms Grid -->
+            <div class="p-4">
+                <div class="row g-3">
+                    {% for room in rooms %}
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <a href="{% url 'rooms:detail' room.pk %}" class="text-decoration-none d-block h-100">
+                            <div class="room-card h-100 position-relative overflow-hidden"
+                                 data-status="{{ room.status }}"
+                                 data-room-number="{{ room.room_number }}">
+                                
+                                <!-- Card Background -->
+                                <div class="room-background h-100 p-3 d-flex flex-column align-items-center justify-content-center position-relative"
+                                     style="background-color: {% if room.status == 'ว่าง' %}#ecfdf5{% elif room.status == 'ไม่ว่าง' %}#f0f9ff{% else %}#fef2f2{% endif %}; border: 2px solid {% if room.status == 'ว่าง' %}#a7f3d0{% elif room.status == 'ไม่ว่าง' %}#bfdbfe{% else %}#fecaca{% endif %}; border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                    
+                                    <!-- Room Status Icon -->
+                                    <div class="position-absolute top-0 end-0" style="opacity: 0.1; margin: 8px;">
+                                        {% if room.status == 'ว่าง' %}
+                                            <i class="fa-solid fa-circle-check" style="font-size: 24px; color: #16a34a;"></i>
+                                        {% elif room.status == 'ไม่ว่าง' %}
+                                            <i class="fa-solid fa-user-check" style="font-size: 24px; color: #1A3C6C;"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-tools" style="font-size: 24px; color: #dc2626;"></i>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Room Number -->
+                                    <h5 class="fw-bold mb-2 text-dark">{{ room.room_number }}</h5>
+                                    
+                                    <!-- Status Badge -->
+                                    <span class="badge
+                                        {% if room.status == 'ว่าง' %}bg-success
+                                        {% elif room.status == 'ไม่ว่าง' %}bg-info
+                                        {% else %}bg-danger{% endif %}"
+                                       style="font-size: 11px; padding: 4px 8px;">
+                                        {% if room.status == 'ว่าง' %}
+                                            <i class="fa-solid fa-circle-check me-1"></i>ว่าง
+                                        {% elif room.status == 'ไม่ว่าง' %}
+                                            <i class="fa-solid fa-user me-1"></i>เช่า
+                                        {% else %}
+                                            <i class="fa-solid fa-wrench me-1"></i>ซ่อม
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <!-- Tenant Info Overlay -->
+                                <div class="tenant-overlay position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3" 
+                                     style="background: linear-gradient(135deg, rgba(26, 60, 108, 0.95) 0%, rgba(45, 85, 135, 0.95) 100%); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                 <i class="fa-solid {% if room.status == 'occupied' %}fa-user-tie{% else %}fa-door-open{% endif %}"></i>
+                                    {% if room.status == 'ไม่ว่าง' %}
+                                        <span class="text-white fw-semibold text-center" style="font-size: 13px; word-wrap: break-word;">{{ room.current_tenant.first_name }} {{ room.current_tenant.last_name }}</span>
+                                        <small class="text-white-50 text-center mt-2">{{ room.room_type|upper }}</small>
+                                    {% else %}
+                                        <span class="text-white fw-semibold text-center">ไม่มีผู้เช่า</span>
+                                        <small class="text-white-50 text-center mt-2">พร้อมจองได้</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Floor Plan Layout Info -->
+                <div class="mt-4 pt-4 border-top">
+                    <div class="row g-3 text-center small">
+                        <div class="col-4">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <div style="width: 16px; height: 16px; background-color: #a7f3d0; border: 2px solid #16a34a; border-radius: 4px;"></div>
+                                <span class="text-muted">ห้องว่าง</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <div style="width: 16px; height: 16px; background-color: #bfdbfe; border: 2px solid #1A3C6C; border-radius: 4px;"></div>
+                                <span class="text-muted">มีผู้เช่า</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <div style="width: 16px; height: 16px; background-color: #fecaca; border: 2px solid #dc2626; border-radius: 4px;"></div>
+                                <span class="text-muted">ซ่อมบำรุง</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="sys-card p-5 text-center">
+            <div style="padding: 40px 0;">
+                <i class="fa-solid fa-building text-muted" style="font-size: 48px; opacity: 0.3; display: block; margin-bottom: 20px;"></i>
+                <h5 class="text-muted fw-semibold mb-2">ยังไม่มีข้อมูลห้องพัก</h5>
+                <p class="text-muted small mb-4">โปรดสร้างข้อมูลห้องพักหรือรันคำสั่ง seed data เพื่อสร้างตัวอย่าง</p>
+                <a href="{% url 'rooms:create' %}" class="btn btn-primary shadow-sm">
+                    <i class="fa-solid fa-plus me-2"></i>เพิ่มห้องพักใหม่
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% block scripts %}
+<style>
+    .room-card {
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .room-card[data-status="ว่าง"]:hover .room-background {
+        transform: scale(1.08);
+        box-shadow: 0 12px 24px rgba(26, 60, 108, 0.15) !important;
+        border-color: #4ade80 !important;
+    }
+
+    .room-card[data-status="ไม่ว่าง"]:hover .room-background {
+        transform: scale(1.08);
+        box-shadow: 0 12px 24px rgba(26, 60, 108, 0.15) !important;
+        border-color: #0284c7 !important;
+    }
+
+    .room-card[data-status="ซ่อมบำรุง"]:hover .room-background {
+        transform: scale(1.08);
+        box-shadow: 0 12px 24px rgba(26, 60, 108, 0.15) !important;
+        border-color: #ef4444 !important;
+    }
+
+    .room-card:hover .tenant-overlay {
+        opacity: 1 !important;
+    }
+
+    .tenant-overlay {
+        border-radius: 16px;
+        backdrop-filter: blur(2px);
+    }
+
+    /* Enhanced Button Styles */
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Badge animations */
+    .badge {
+        transition: all 0.3s ease;
+    }
+
+    /* Form enhancements */
+    .form-select {
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    @media (max-width: 576px) {
+        .room-card .room-background {
+            padding: 8px !important;
+        }
+
+        .room-card h5 {
+            font-size: 16px !important;
+        }
+    }
+</style>
+
+<script>
+    // Auto-submit filter on change
+    document.getElementById('statusFilter')?.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+    
+    document.getElementById('floorFilter')?.addEventListener('change', function() {
+        document.getElementById('filterForm').submit();
+    });
+
+    // Add smooth scroll to room sections
+    document.querySelectorAll('.room-card').forEach(card => {
+        card.addEventListener('mouseover', function() {
+            this.style.zIndex = '10';
+        });
+        card.addEventListener('mouseout', function() {
+            this.style.zIndex = '1';
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block header_title %}Room {{ room.room_number }}{% endblock %}
+{% block header_subtitle %}Detailed information and current tenant status{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4 gap-2">
+    <a href="{% url 'rooms:list' %}" class="btn btn-light shadow-sm"><i class="fa-solid fa-arrow-left me-2"></i>Back to Rooms</a>
+    <a href="{% url 'rooms:edit' room.pk %}" class="btn btn-primary-saas btn-saas shadow-sm"><i class="fa-solid fa-pen me-2"></i>Edit Room</a>
+</div>
+
+<div class="row g-4">
+    <!-- Room Info Card -->
+    <div class="col-lg-7">
+        <div class="saas-card h-100 overflow-hidden">
+            <div class="p-4 border-bottom bg-light bg-opacity-50 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 border-0"><i class="fa-solid fa-circle-info text-primary me-2"></i>Room Specs</h5>
+                {% if room.status == 'available' %}
+                    <span class="badge badge-soft-success rounded-pill px-3 py-2">Available</span>
+                {% elif room.status == 'occupied' %}
+                    <span class="badge badge-soft-primary rounded-pill px-3 py-2" style="background-color: #cce5ff; font-weight: 500;">Occupied</span>
+                {% else %}
+                    <span class="badge badge-soft-danger rounded-pill px-3 py-2">Maintenance</span>
+                {% endif %}
+            </div>
+            <div class="p-4">
+                <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
+                    <div class="flex-shrink-0">
+                        {% if room.image %}
+                            <img src="{{ room.image.url }}" alt="Room {{ room.room_number }}" class="rounded-3 shadow-sm object-fit-cover border" style="width: 160px; height: 160px;">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center bg-light text-muted rounded-3 border" style="width: 160px; height: 160px; border-style: dashed !important;">
+                                <div class="text-center">
+                                    <i class="fa-solid fa-image fa-2x mb-2"></i>
+                                    <div class="small">No Image</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 w-100">
+                        <table class="table table-borderless table-sm mb-0">
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted w-25 pb-3">Floor</td>
+                                    <td class="fw-medium pb-3">{{ room.floor }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted pb-3">Type</td>
+                                    <td class="fw-medium pb-3">{{ room.get_room_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted pb-3">Size</td>
+                                    <td class="fw-medium pb-3">{{ room.size_sqm }} sqm</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted pb-3">Monthly Rent</td>
+                                    <td class="fw-bold text-dark fs-5 pb-3">฿{{ room.monthly_rent }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                {% if room.description %}
+                <div class="mt-4 pt-4 border-top">
+                    <h6 class="text-muted small fw-bold text-uppercase mb-2">Description</h6>
+                    <p class="mb-0 text-dark">{{ room.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tenant Info Card -->
+    <div class="col-lg-5">
+        <div class="saas-card h-100">
+            <div class="p-4 border-bottom bg-light bg-opacity-50">
+                <h5 class="card-title mb-0 border-0"><i class="fa-solid fa-user-tag text-info me-2"></i>Current Tenant</h5>
+            </div>
+            <div class="p-4">
+                {% if room.current_tenant %}
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            {{ room.current_tenant.first_name|make_list|first|upper }}
+                        </div>
+                        <h5 class="fw-bold mb-1">{{ room.current_tenant.full_name }}</h5>
+                        <div class="badge badge-soft-success rounded-pill px-3 py-1">Active Tenant</div>
+                    </div>
+                    
+                    <ul class="list-group list-group-flush mb-4 border-top">
+                        <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-phone text-muted w-20px text-center"></i>
+                            <span>{{ room.current_tenant.phone }}</span>
+                        </li>
+                        <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-envelope text-muted w-20px text-center"></i>
+                            <span>{{ room.current_tenant.email }}</span>
+                        </li>
+                        <li class="list-group-item px-0 py-3 d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-calendar-check text-muted w-20px text-center"></i>
+                            <span>Move-in: {{ room.current_tenant.move_in_date|date:"d M Y" }}</span>
+                        </li>
+                    </ul>
+
+                    <div class="d-grid">
+                        <a href="{% url 'tenants:detail' room.current_tenant.pk %}" class="btn btn-outline-primary btn-saas">
+                            View Full Profile
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fa-solid fa-user-slash"></i>
+                        </div>
+                        <h6 class="fw-semibold text-muted mb-3">No Tenant Assigned</h6>
+                        <a href="{% url 'tenants:create' %}" class="btn btn-primary-saas btn-saas shadow-sm">
+                            <i class="fa-solid fa-user-plus me-2"></i> Add Tenant
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

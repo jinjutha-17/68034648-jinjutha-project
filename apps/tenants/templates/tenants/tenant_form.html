@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block header_title %}{{ title|default:"Add/Edit Tenant" }}{% endblock %}
+{% block header_subtitle %}Please provide the tenant's details to register them in the system{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="saas-card overflow-hidden">
+            <div class="p-4 border-bottom bg-light bg-opacity-50">
+                <h5 class="card-title mb-0 border-0"><i class="fa-solid fa-address-card text-primary me-2"></i> Tenant Information</h5>
+            </div>
+            <div class="p-4 p-md-5">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            {{ form.first_name|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.last_name|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.email|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.phone|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.id_card|as_crispy_field }}
+                        </div>
+                         <div class="col-md-6">
+                            {{ form.room|as_crispy_field }}
+                        </div>
+                        <div class="col-12 mt-4">
+                            <h6 class="text-muted fw-bold text-uppercase small border-bottom pb-2">Emergency Contact</h6>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.emergency_contact|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.emergency_phone|as_crispy_field }}
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <h6 class="text-muted fw-bold text-uppercase small border-bottom pb-2">Move Data</h6>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.move_in_date|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.move_out_date|as_crispy_field }}
+                        </div>
+                        <div class="col-md-12">
+                            <div class="d-flex align-items-center bg-light p-3 rounded-3 border">
+                                <div class="form-check form-switch fs-5 mb-0 d-flex align-items-center w-100">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label ms-2 fs-6 fw-medium text-dark" for="{{ form.is_active.id_for_label }}">Tenant is currently active</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            {{ form.notes|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex justify-content-end gap-3 pt-4 border-top">
+                        <a href="{% url 'tenants:list' %}" class="btn btn-light px-4">Cancel</a>
+                        <button type="submit" class="btn btn-primary-saas btn-saas shadow-sm px-5">
+                            <i class="fa-solid fa-save me-2"></i> Save Tenant
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
